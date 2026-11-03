@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boceto E · Red de relaciones</title>
+<style>
+  :root {
+    --fondo: #111214; --panel: #18191c; --panel2: #202226; --borde: #2c2e33;
+    --texto: #e8e8ea; --suave: #8e9198; --acento: #d0743c;
+    --mas: #d9b25f; --menos: #7f9bb8; --aviso: #e07a5f;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fondo); color: var(--texto); font: 14px/1.45 system-ui, sans-serif; height: 100vh; display: grid; grid-template-rows: auto auto 1fr; }
+  header { display: flex; align-items: center; gap: 14px; padding: 10px 18px; border-bottom: 1px solid var(--borde); }
+  header h1 { margin: 0; font: italic 22px Georgia, serif; }
+  header .der { margin-left: auto; display: flex; gap: 8px; }
+  header button { background: var(--panel2); color: var(--texto); border: 1px solid var(--borde); border-radius: 6px; padding: 6px 10px; font: inherit; cursor: pointer; }
+  header button.prim { background: var(--acento); border-color: var(--acento); color: #1c0f06; font-weight: 600; }
+
+  /* Tira de la serie entera */
+  .tira { display: flex; gap: 10px; padding: 10px 18px; border-bottom: 1px solid var(--borde); background: var(--panel); align-items: stretch; }
+  .tira .temp { flex: 8; }
+  .tira .temp.prev { flex: 2; opacity: .5; }
+  .tira .temp b { font: italic 13px Georgia, serif; display: block; margin-bottom: 4px; color: var(--suave); }
+  .tira .eps { display: flex; gap: 3px; }
+  .tira .ep { flex: 1; height: 34px; border-radius: 4px; background: var(--panel2); display: flex; flex-direction: column; align-items: center; justify-content: center; font: 10px ui-monospace, monospace; color: var(--suave); cursor: pointer; border: 1px solid transparent; }
+  .tira .ep .c { font-size: 11px; }
+  .tira .ep.sel { border-color: var(--acento); color: var(--texto); background: #2a1e16; }
+  .tira .ep.afectado { border-color: var(--aviso); background: #2b1b17; }
+  .c .m { color: var(--mas); } .c .n { color: var(--menos); }
+
+  .zona { display: grid; grid-template-columns: 1fr 520px 1fr; gap: 0; min-height: 0; position: relative; }
+  svg.hilos { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .lado { padding: 20px 14px; display: flex; flex-direction: column; gap: 10px; overflow: auto; z-index: 1; }
+  .lado h4 { margin: 0; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--suave); }
+  .nodo { background: var(--panel); border: 1px solid var(--borde); border-radius: 8px; padding: 8px 10px; font-size: 13px; display: flex; gap: 8px; align-items: center; cursor: pointer; }
+  .nodo .p { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .nodo small { color: var(--suave); display: block; }
+  .nodo.mal { border-color: var(--aviso); background: #2b1b17; }
+  .nodo.mal small { color: #f0a08c; }
+
+  .centro { padding: 18px; z-index: 1; overflow: auto; }
+  .tarj { background: var(--panel); border: 1px solid var(--acento); border-radius: 12px; padding: 18px; box-shadow: 0 10px 40px #0007; }
+  .tarj .tipo { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--suave); }
+  .tarj h2 { margin: 2px 0 12px; font: 26px Georgia, serif; }
+  .campo { margin-bottom: 12px; }
+  .campo label { display: block; font-size: 12px; color: var(--suave); margin-bottom: 4px; }
+  .campo textarea, .campo input { width: 100%; background: var(--panel2); color: var(--texto); border: 1px solid var(--borde); border-radius: 6px; padding: 8px 10px; font: inherit; }
+  .carga { display: flex; gap: 8px; align-items: center; }
+  .carga button { width: 44px; height: 34px; border-radius: 6px; border: 1px solid var(--borde); background: var(--panel2); color: var(--texto); font: 600 18px system-ui; cursor: pointer; }
+  .carga button.m { color: var(--mas); } .carga button.n { color: var(--menos); }
+  .carga span { color: var(--suave); }
+  .consec { margin-top: 12px; border-top: 1px solid var(--borde); padding-top: 10px; font-size: 13px; }
+  .consec h5 { margin: 0 0 6px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--suave); }
+  .consec .mal { color: #f0a08c; }
+  .consec .mal b { color: var(--aviso); }
+  .consec .ok { color: var(--suave); }
+  .nota { position: fixed; bottom: 12px; left: 18px; font-size: 12px; color: var(--suave); background: var(--panel2); padding: 6px 10px; border-radius: 6px; border: 1px dashed var(--borde); max-width: 520px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Primera · prueba</h1>
+  <div class="der"><button>Mapa de arcos</button><button>Tablero</button><button>Historia</button><button class="prim">+ Idea</button></div>
+</header>
+
+<div class="tira" id="tira"></div>
+
+<div class="zona" id="zona">
+  <svg class="hilos" id="hilos"></svg>
+  <div class="lado" id="izq">
+    <h4>Arcos que pasan</h4>
+    <div class="nodo" data-h="1"><span class="p" style="background:#d0655b"></span><div>El eco · A<small>beat: Telmo enciende el transmisor</small></div></div>
+    <div class="nodo" data-h="2"><span class="p" style="background:#4fb3a9"></span><div>La tormenta · A<small>segunda emisión</small></div></div>
+    <div class="nodo" data-h="3"><span class="p" style="background:#7fa6de"></span><div>Amistad rota · B<small>gira aquí: Nando dolido</small></div></div>
+    <h4 style="margin-top:12px">Secretos</h4>
+    <div class="nodo" data-h="4"><span class="p" style="background:#d9b25f"></span><div>Quién grabó la cinta<small>pista sembrada aquí</small></div></div>
+  </div>
+
+  <div class="centro">
+    <div class="tarj" id="tarjeta">
+      <div class="tipo">Episodio · T1 E05 · propuesta</div>
+      <h2>El apagón</h2>
+      <div class="campo"><label>Idea central</label><textarea rows="2">Telmo mantiene la emisora en el aire, pero el Alcalde se lo cobra a su manera: alguien cercano paga por él.</textarea></div>
+      <div class="campo"><label>Carga: empieza → acaba</label>
+        <div class="carga"><button id="cIni" class="m">+</button><span>→</span><button id="cFin" class="n">−</button><span style="margin-left:8px">pulsa para cambiar</span></div></div>
+      <div class="campo"><label>Gancho</label><input id="gancho" value="" placeholder="¿Qué queda abierto al acabar?"></div>
+      <div class="consec" id="consec"></div>
+    </div>
+  </div>
+
+  <div class="lado" id="der">
+    <h4>Personajes</h4>
+    <div class="nodo" data-h="5"><span class="p" style="background:#b48ad8"></span><div>[[Telmo]]<small>protagonista del episodio</small></div></div>
+    <div class="nodo" data-h="6"><span class="p" style="background:#9a9ca3"></span><div>[[Nando]]<small>paga por Telmo</small></div></div>
+    <h4 style="margin-top:12px">Vecinos</h4>
+    <div class="nodo" data-h="7" id="prev"><span class="p" style="background:#555"></span><div>E04 · Primera guardia<small>acaba en +</small></div></div>
+    <div class="nodo" data-h="8" id="next"><span class="p" style="background:#555"></span><div>E06 · La cinta<small>empieza en −</small></div></div>
+  </div>
+</div>
+
+<div class="nota">Boceto E — La pieza en el centro y todo lo que toca alrededor, unido con hilos. Arriba, la serie entera. Pulsa la carga (+/−) o escribe un gancho: se iluminan en rojo los vecinos afectados y la regla que no se cumple.</div>
+
+<script>
+  const eps = [['+','−'],['−','+'],['+','−'],['−','+'],['+','−'],['−','+'],['+','+'],['+','−'],['',''],['',''],['',''],['',''],['',''],['',''],['',''],['','']];
+  let cIni = '+', cFin = '−';
+  function tira(afectados) {
+    const t = document.getElementById('tira');
+    const sig = s => s === '+' ? '<span class="m">+</span>' : s === '−' ? '<span class="n">−</span>' : '·';
+    const bloque = (tit, a, b, prev) => `<div class="temp ${prev ? 'prev' : ''}"><b>${tit}</b><div class="eps">${prev ? '<div class="ep">?</div>' : eps.slice(a, b).map((e, k) => {
+      const i = a + k; const c = i === 4 ? [cIni, cFin] : e;
+      return `<div class="ep ${i === 4 ? 'sel' : ''} ${afectados.includes(i) ? 'afectado' : ''}">E0${k + 1}<span class="c">${sig(c[0])} → ${sig(c[1])}</span></div>`; }).join('')}</div></div>`;
+    t.innerHTML = bloque('T1 · Cerrar la emisora', 0, 8) + bloque('T2', 8, 16) + bloque('T3 prevista', 0, 0, true);
+  }
+  function hilos() {
+    const svg = document.getElementById('hilos'), z = document.getElementById('zona').getBoundingClientRect();
+    const c = document.getElementById('tarjeta').getBoundingClientRect();
+    let h = '';
+    document.querySelectorAll('.nodo').forEach(n => {
+      const r = n.getBoundingClientRect(); const izq = r.left < c.left;
+      const x1 = (izq ? r.right : r.left) - z.left, y1 = r.top + r.height / 2 - z.top;
+      const x2 = (izq ? c.left : c.right) - z.left, y2 = c.top + Math.min(c.height / 2, 160) - z.top;
+      const mal = n.classList.contains('mal');
+      h += `<path d="M${x1} ${y1} C${(x1 + x2) / 2} ${y1}, ${(x1 + x2) / 2} ${y2}, ${x2} ${y2}" fill="none" stroke="${mal ? '#e07a5f' : '#3a3c42'}" stroke-width="${mal ? 2.5 : 1.5}"/>`;
+    });
+    svg.innerHTML = h;
+  }
+  function evaluar() {
+    const out = []; const afect = [];
+    const prev = document.getElementById('prev'), next = document.getElementById('next');
+    prev.classList.toggle('mal', cIni !== '+'); next.classList.toggle('mal', cFin !== '−');
+    prev.querySelector('small').textContent = 'acaba en +' + (cIni !== '+' ? ' → E05 debería empezar en +' : '');
+    next.querySelector('small').textContent = 'empieza en −' + (cFin !== '−' ? ' → ya no encaja' : '');
+    if (cIni === cFin) out.push(`<p class="mal"><b>G38 · Guía de Atelier</b> — Empieza y acaba igual (${cIni} → ${cFin}). Si no cambia el valor, el episodio no avanza.</p>`);
+    if (cIni !== '+') { afect.push(3); out.push(`<p class="mal"><b>Regla del + y el −</b> — Cada episodio empieza como acabó el anterior: E04 acaba en +, así que E05 debería empezar en +.</p>`); }
+    if (cFin !== '−') { afect.push(5); out.push(`<p class="mal"><b>Regla del + y el −</b> — E06 empieza en −: tendrías que cambiar E06 o este final.</p>`); }
+    if (!document.getElementById('gancho').value.trim()) out.push(`<p class="mal"><b>G40 · Guía de Atelier</b> — Que cada episodio acabe con alguna incógnita abierta. Falta el gancho.</p>`);
+    else out.push('<p class="ok">✓ Tiene gancho: E06 lo recibe como pregunta abierta.</p>');
+    out.push('<p class="ok">Toca 3 arcos, 1 secreto y 2 personajes. Cambiarlo afecta a sus fichas.</p>');
+    document.getElementById('consec').innerHTML = '<h5>Consecuencias</h5>' + out.join('');
+    tira(afect); requestAnimationFrame(hilos);
+  }
+  const rot = s => s === '+' ? '−' : '+';
+  document.getElementById('cIni').onclick = e => { cIni = rot(cIni); e.target.textContent = cIni; e.target.className = cIni === '+' ? 'm' : 'n'; evaluar(); };
+  document.getElementById('cFin').onclick = e => { cFin = rot(cFin); e.target.textContent = cFin; e.target.className = cFin === '+' ? 'm' : 'n'; evaluar(); };
+  document.getElementById('gancho').oninput = evaluar;
+  window.onresize = hilos;
+  evaluar();
+</script>
+</body>
+</html>

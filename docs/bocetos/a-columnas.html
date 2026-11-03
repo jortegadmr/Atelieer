@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boceto A · Columnas</title>
+<style>
+  :root {
+    --fondo: #121315; --panel: #1a1b1e; --panel2: #222327; --borde: #2e3035;
+    --texto: #e6e6e8; --suave: #9a9ca3; --acento: #e8a33d;
+    --idea: #8a8d94; --borrador: #5b9bd5; --propuesta: #a07ad6; --canon: #4fb37a; --aparcado: #c9a14a; --descartado: #b25b5b;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fondo); color: var(--texto); font: 14px/1.45 system-ui, sans-serif; height: 100vh; display: flex; flex-direction: column; }
+  header { display: flex; align-items: center; gap: 16px; padding: 10px 16px; border-bottom: 1px solid var(--borde); background: var(--panel); }
+  header h1 { font-size: 15px; margin: 0; letter-spacing: .5px; }
+  header h1 span { color: var(--acento); }
+  nav.vistas { display: flex; gap: 4px; margin-left: 12px; }
+  nav.vistas button { background: none; border: 1px solid transparent; color: var(--suave); padding: 5px 10px; border-radius: 6px; cursor: pointer; font: inherit; }
+  nav.vistas button.activa { color: var(--texto); border-color: var(--borde); background: var(--panel2); }
+  .captura { margin-left: auto; background: var(--acento); color: #1a1205; border: 0; padding: 7px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+  .captura kbd { font: 11px system-ui; opacity: .7; margin-left: 6px; }
+  main { flex: 1; display: grid; grid-template-columns: repeat(4, minmax(180px, 1fr)) 340px; min-height: 0; }
+  .col { border-right: 1px solid var(--borde); overflow: auto; padding: 10px 8px; }
+  .col h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--suave); margin: 4px 8px 10px; display: flex; justify-content: space-between; }
+  .col h2 button { background: none; border: 0; color: var(--acento); cursor: pointer; font-size: 16px; line-height: 1; }
+  .item { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px; cursor: pointer; }
+  .item:hover { background: var(--panel2); }
+  .item.sel { background: #2b2620; outline: 1px solid var(--acento); }
+  .item .t { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .item .flecha { color: var(--suave); }
+  .item.descartado .t { text-decoration: line-through; color: var(--suave); }
+  .punto { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .carga { font: 11px ui-monospace, monospace; color: var(--suave); }
+  .aviso-mini { color: var(--acento); font-size: 12px; }
+  aside { background: var(--panel); overflow: auto; padding: 16px; }
+  aside .tipo { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--suave); }
+  aside h3 { margin: 4px 0 10px; font-size: 20px; }
+  .estados { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
+  .estados span { font-size: 12px; padding: 3px 8px; border-radius: 99px; border: 1px solid var(--borde); color: var(--suave); }
+  .estados span.on { color: #fff; border-color: transparent; }
+  textarea { width: 100%; min-height: 110px; background: var(--panel2); color: var(--texto); border: 1px solid var(--borde); border-radius: 6px; padding: 10px; font: inherit; resize: vertical; }
+  .bloque { margin-top: 16px; }
+  .bloque h4 { margin: 0 0 6px; font-size: 12px; color: var(--suave); text-transform: uppercase; letter-spacing: 1px; }
+  .guia { border-left: 3px solid var(--acento); background: #26211a; padding: 8px 10px; border-radius: 4px; margin-bottom: 6px; font-size: 13px; }
+  .guia b { color: var(--acento); }
+  .guia .acciones { margin-top: 6px; display: flex; gap: 6px; }
+  .guia .acciones button, .alt button { font: 12px system-ui; background: var(--panel2); color: var(--texto); border: 1px solid var(--borde); border-radius: 4px; padding: 3px 8px; cursor: pointer; }
+  .alt { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--borde); font-size: 13px; }
+  .alt .t { flex: 1; }
+  footer { padding: 6px 16px; font-size: 12px; color: var(--suave); border-top: 1px solid var(--borde); background: var(--panel); display: flex; gap: 16px; }
+  .nota { position: fixed; bottom: 34px; left: 16px; font-size: 12px; color: var(--suave); background: var(--panel2); padding: 6px 10px; border-radius: 6px; border: 1px dashed var(--borde); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Atelier <span>·</span> Primera · prueba</h1>
+  <nav class="vistas">
+    <button class="activa">Estructura</button><button>Tablero</button><button>Emisión</button><button>Historia</button><button>Arcos</button><button>Fichas</button>
+  </nav>
+  <button class="captura">+ Idea<kbd>Ctrl Espacio</kbd></button>
+</header>
+
+<main>
+  <section class="col">
+    <h2>Tramas <button title="Nueva trama">+</button></h2>
+    <div class="item sel"><span class="punto" style="background:var(--canon)"></span><span class="t">A · El eco</span><span class="flecha">›</span></div>
+    <div class="item"><span class="punto" style="background:var(--canon)"></span><span class="t">A · La tormenta</span><span class="flecha">›</span></div>
+    <div class="item"><span class="punto" style="background:var(--borrador)"></span><span class="t">A · Telmo: callar o avisar</span><span class="flecha">›</span></div>
+    <div class="item"><span class="punto" style="background:var(--borrador)"></span><span class="t">B · Amistad rota</span><span class="flecha">›</span></div>
+    <div class="item"><span class="punto" style="background:var(--idea)"></span><span class="t">B · La cinta oculta</span><span class="aviso-mini">▲</span></div>
+    <div class="item"><span class="punto" style="background:var(--borrador)"></span><span class="t">C · Voces cruzadas</span><span class="flecha">›</span></div>
+    <div class="item descartado"><span class="punto" style="background:var(--descartado)"></span><span class="t">B · Nando se va en E05</span></div>
+  </section>
+
+  <section class="col">
+    <h2>Temporadas <button title="Nueva temporada">+</button></h2>
+    <div class="item sel"><span class="punto" style="background:var(--borrador)"></span><span class="t">T1 · Cerrar la emisora</span><span class="flecha">›</span></div>
+    <div class="item"><span class="punto" style="background:var(--idea)"></span><span class="t">T2 · sin título</span><span class="flecha">›</span></div>
+    <div class="item"><span class="punto" style="background:var(--idea)"></span><span class="t">T3 · sin título</span><span class="flecha">›</span></div>
+  </section>
+
+  <section class="col">
+    <h2>Episodios <button title="Nuevo episodio">+</button></h2>
+    <div class="item sel"><span class="punto" style="background:var(--canon)"></span><span class="t">E01 · La señal</span><span class="carga">+ −</span></div>
+    <div class="item"><span class="punto" style="background:var(--borrador)"></span><span class="t">E02 · El aviso</span><span class="carga">− +</span></div>
+    <div class="item"><span class="punto" style="background:var(--borrador)"></span><span class="t">E03 · Dos micrófonos</span><span class="carga">+ −</span></div>
+    <div class="item"><span class="punto" style="background:var(--borrador)"></span><span class="t">E04 · Primera guardia</span><span class="carga">− +</span></div>
+    <div class="item"><span class="punto" style="background:var(--propuesta)"></span><span class="t">E05 · El apagón</span><span class="carga">+ −</span></div>
+    <div class="item"><span class="punto" style="background:var(--idea)"></span><span class="t">E06 · La cinta</span><span class="carga">− +</span></div>
+    <div class="item"><span class="punto" style="background:var(--idea)"></span><span class="t">E07 · Voz vieja</span><span class="aviso-mini">▲</span></div>
+    <div class="item"><span class="punto" style="background:var(--idea)"></span><span class="t">E08 · El pleno</span><span class="carga">+ −</span></div>
+  </section>
+
+  <section class="col">
+    <h2>Actos y escenas <button title="Nueva escena">+</button></h2>
+    <div class="item"><span class="punto" style="background:var(--canon)"></span><span class="t">Teaser · La llegada</span></div>
+    <div class="item"><span class="punto" style="background:var(--borrador)"></span><span class="t">Acto 1 · La visita del Alcalde</span></div>
+    <div class="item"><span class="punto" style="background:var(--idea)"></span><span class="t">Acto 2 · La caja dla madre</span></div>
+    <div class="item"><span class="punto" style="background:var(--idea)"></span><span class="t">Acto 3 · Telmo firma</span></div>
+  </section>
+
+  <aside>
+    <div class="tipo">Episodio · T1 E01</div>
+    <h3>La señal</h3>
+    <div class="estados">
+      <span>idea</span><span>borrador</span><span>propuesta</span><span class="on" style="background:var(--canon)">canon 🔒</span><span>aparcado</span><span>descartado</span>
+    </div>
+    <textarea>Telmo vuelve a Cabo Sal para cerrar la emisora y capta una voz que lee las noticias de mañana.</textarea>
+
+    <div class="bloque">
+      <h4>Guías</h4>
+      <div class="guia"><b>G40 · Chuleta de escritura</b> — Que cada episodio acabe con alguna incógnita abierta. Este episodio no tiene gancho.
+        <div class="acciones"><button>Ir al campo</button><button>Seguir así (a propósito)</button></div>
+      </div>
+    </div>
+
+    <div class="bloque">
+      <h4>Versiones</h4>
+      <div class="alt"><span class="punto" style="background:var(--canon)"></span><span class="t">A · Telmo vuelve a Cabo Sal…</span><button>Ver</button></div>
+      <div class="alt"><span class="punto" style="background:var(--aparcado)"></span><span class="t">B · Empieza en la tormenta, llegada en flashback</span><button>Comparar</button></div>
+    </div>
+
+    <div class="bloque">
+      <h4>Enlaces</h4>
+      <div style="color:var(--suave);font-size:13px">[[Telmo]] · [[El Farero]] · Secreto: La cinta oculta</div>
+    </div>
+  </aside>
+</main>
+
+<footer><span>Vault · Sincronizado</span><span>Guardado hace 2 s</span><span>Abierta solo en este equipo</span></footer>
+<div class="nota">Boceto A — Columnas: cada columna es un nivel; eliges a la izquierda y se concreta hacia la derecha.</div>
+<script>
+  document.querySelectorAll('.col').forEach(col => col.addEventListener('click', e => {
+    const it = e.target.closest('.item'); if (!it) return;
+    col.querySelectorAll('.item').forEach(i => i.classList.remove('sel')); it.classList.add('sel');
+  }));
+</script>
+</body>
+</html>

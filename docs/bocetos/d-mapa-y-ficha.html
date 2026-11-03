@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boceto D · Mapa y ficha</title>
+<style>
+  :root {
+    --fondo: #111214; --panel: #18191c; --panel2: #202226; --borde: #2c2e33;
+    --texto: #e8e8ea; --suave: #8e9198; --acento: #d0743c;
+    --mas: #d9b25f; --menos: #7f9bb8; --aviso: #e07a5f;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fondo); color: var(--texto); font: 14px/1.45 system-ui, sans-serif; height: 100vh; display: grid; grid-template-rows: auto 1fr; }
+  header { display: flex; align-items: center; gap: 14px; padding: 10px 18px; border-bottom: 1px solid var(--borde); }
+  header h1 { margin: 0; font: italic 22px Georgia, serif; }
+  header .sub { color: var(--suave); font-size: 12px; }
+  header .der { margin-left: auto; display: flex; gap: 8px; }
+  header button { background: var(--panel2); color: var(--texto); border: 1px solid var(--borde); border-radius: 6px; padding: 6px 10px; font: inherit; cursor: pointer; }
+  header button.prim { background: var(--acento); border-color: var(--acento); color: #1c0f06; font-weight: 600; }
+  .cuerpo { display: grid; grid-template-rows: 300px 1fr; min-height: 0; }
+
+  /* Mapa de toda la serie */
+  .mapa { border-bottom: 1px solid var(--borde); padding: 12px 18px 8px; overflow: hidden; position: relative; }
+  .mapa h2 { margin: 0 0 6px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--suave); display: flex; gap: 16px; }
+  .mapa h2 span.ley { text-transform: none; letter-spacing: 0; }
+  svg { width: 100%; height: 250px; display: block; }
+  .temp-fondo { fill: #1a1b1e; }
+  .temp-fondo.prevista { fill: none; stroke: #3a3c42; stroke-dasharray: 4 4; }
+  .temp-tit { fill: var(--texto); font: italic 14px Georgia, serif; }
+  .ep { fill: var(--suave); font: 10px ui-monospace, monospace; }
+  .linea { fill: none; stroke-width: 4; stroke-linecap: round; }
+  .linea.borrador { stroke-dasharray: 8 5; }
+  .linea.tenue { opacity: .25; }
+  .fantasma { fill: none; stroke-width: 4; stroke-linecap: round; stroke-dasharray: 2 6; opacity: .9; }
+  .parada { stroke: var(--fondo); stroke-width: 2; }
+  .etq { font: 12px system-ui; fill: var(--texto); }
+  .etq.tenue { opacity: .35; }
+  .sel-banda { fill: var(--acento); opacity: .08; }
+
+  /* Ficha + consecuencias */
+  .abajo { display: grid; grid-template-columns: 1fr 380px; min-height: 0; }
+  .ficha { overflow: auto; padding: 18px 22px; }
+  .ficha .tipo { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--suave); }
+  .ficha h3 { margin: 2px 0 14px; font: 28px Georgia, serif; }
+  .campos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 18px; max-width: 900px; }
+  .campo label { display: block; font-size: 12px; color: var(--suave); margin-bottom: 4px; }
+  .campo input, .campo select, .campo textarea { width: 100%; background: var(--panel2); color: var(--texto); border: 1px solid var(--borde); border-radius: 6px; padding: 8px 10px; font: inherit; }
+  .campo textarea { min-height: 64px; resize: vertical; }
+  .campo.ancho { grid-column: 1 / -1; }
+  .campo.cambiado select, .campo.cambiado input { border-color: var(--acento); box-shadow: 0 0 0 1px var(--acento); }
+  .estado { display: inline-flex; gap: 4px; margin-left: 10px; vertical-align: middle; }
+  .estado span { font: 12px system-ui; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--borde); color: var(--suave); }
+  .estado span.on { background: #2f5d45; border-color: #2f5d45; color: #fff; }
+
+  .efectos { border-left: 1px solid var(--borde); background: var(--panel); overflow: auto; padding: 16px; }
+  .efectos h4 { margin: 0 0 8px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--suave); }
+  .efectos .vacio { color: var(--suave); font-size: 13px; }
+  .efecto { padding: 8px 10px; border-radius: 6px; background: var(--panel2); margin-bottom: 6px; font-size: 13px; display: flex; gap: 8px; }
+  .efecto .ico { flex: none; width: 18px; text-align: center; }
+  .efecto.mal { background: #2b1b17; border-left: 3px solid var(--aviso); }
+  .efecto.mal b { color: var(--aviso); }
+  .efecto small { display: block; color: var(--suave); margin-top: 2px; }
+  .acciones { display: flex; gap: 6px; margin-top: 10px; }
+  .acciones button { flex: 1; background: var(--panel2); color: var(--texto); border: 1px solid var(--borde); border-radius: 6px; padding: 7px; font: inherit; cursor: pointer; }
+  .acciones button.prim { background: var(--acento); color: #1c0f06; border-color: var(--acento); font-weight: 600; }
+  .nota { position: fixed; bottom: 12px; left: 18px; font-size: 12px; color: var(--suave); background: var(--panel2); padding: 6px 10px; border-radius: 6px; border: 1px dashed var(--borde); max-width: 520px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Primera · prueba</h1>
+  <span class="sub">La serie entera arriba · la pieza elegida abajo · a la derecha, lo que cambia</span>
+  <div class="der"><button>Tablero</button><button>Historia</button><button>Fichas</button><button class="prim">+ Idea</button></div>
+</header>
+
+<div class="cuerpo">
+  <section class="mapa">
+    <h2>Mapa de la serie <span class="ley">línea sólida = canon · discontinua = borrador · punteada naranja = cómo quedaría</span></h2>
+    <svg id="mapa" viewBox="0 0 1400 250" preserveAspectRatio="none"></svg>
+  </section>
+
+  <div class="abajo">
+    <section class="ficha">
+      <div class="tipo">Arco de relación · B</div>
+      <h3>Amistad rota <span class="estado"><span>idea</span><span class="on">borrador</span><span>propuesta</span><span>canon</span></span></h3>
+      <div class="campos">
+        <div class="campo"><label>Nivel</label>
+          <select id="nivel"><option value="t1">Temporada 1</option><option value="serie">Toda la serie</option></select></div>
+        <div class="campo"><label>Protagonistas</label><input value="[[Telmo]], [[Nando]]"></div>
+        <div class="campo"><label>Empieza en</label>
+          <select id="inicio"><option value="2">T1 · E03 Dos micrófonos</option><option value="1">T1 · E02 El aviso</option></select></div>
+        <div class="campo"><label>Termina en</label>
+          <select id="fin"><option value="5">T1 · E06 La cinta</option><option value="7">T1 · E08 El pleno</option><option value="11">T2 · E04</option></select></div>
+        <div class="campo ancho"><label>De dónde parte → a dónde llega</label><input value="Dos micrófonos inseparables → Nando no perdona la firma"></div>
+        <div class="campo"><label>Qué gana</label><textarea>Telmo aprende a pedir ayuda.</textarea></div>
+        <div class="campo"><label>Qué pierde</label><textarea>A su amigo, al menos durante una temporada.</textarea></div>
+      </div>
+    </section>
+
+    <aside class="efectos">
+      <h4>Si lo dejas así…</h4>
+      <div id="efectos"></div>
+      <div class="acciones" id="acciones" hidden><button>Deshacer</button><button>Guardar como propuesta</button><button class="prim">Aplicar</button></div>
+    </aside>
+  </div>
+</div>
+
+<div class="nota">Boceto D — Prueba a cambiar «Termina en» o «Nivel»: el mapa dibuja cómo quedaría y la columna derecha dice a qué afecta y qué regla de tus guías no se cumple.</div>
+
+<script>
+  // 16 episodios: T1 (0-7), T2 (8-15); T3 prevista.
+  const X0 = 170, PASO = 68;
+  const x = i => X0 + i * PASO + PASO / 2;
+  const svg = document.getElementById('mapa');
+  const arcos = [
+    { id: 'ven', nom: 'El eco · A', color: '#d0655b', y: 50, ini: 0, fin: 17, estado: 'canon', paradas: [0, 4, 9, 15] },
+    { id: 'tel', nom: 'Telmo · callar → avisar', color: '#b48ad8', y: 85, ini: 0, fin: 17, estado: 'borrador', paradas: [0, 4, 13] },
+    { id: 'tor', nom: 'La tormenta · A', color: '#4fb3a9', y: 120, ini: 3, fin: 6, estado: 'canon', paradas: [3, 6] },
+    { id: 'her', nom: 'Amistad rota · B', color: '#7fa6de', y: 155, ini: 2, fin: 5, estado: 'borrador', paradas: [2, 4, 5] },
+    { id: 'car', nom: 'La cinta oculta · B', color: '#d9b25f', y: 190, ini: 0, fin: 9, estado: 'borrador', paradas: [0, 5, 9] },
+    { id: 'amo', nom: 'Voces cruzadas · C', color: '#8fc47a', y: 225, ini: 1, fin: 7, estado: 'borrador', paradas: [1, 7] },
+  ];
+  const base = { nivel: 't1', inicio: 2, fin: 5 };
+  const ns = 'http://www.w3.org/2000/svg';
+  const el = (t, a, txt) => { const e = document.createElementNS(ns, t); for (const k in a) e.setAttribute(k, a[k]); if (txt) e.textContent = txt; svg.appendChild(e); return e; };
+
+  function dibujar(estado) {
+    svg.innerHTML = '';
+    el('rect', { class: 'temp-fondo', x: X0, y: 8, width: PASO * 8 - 6, height: 240, rx: 6 });
+    el('rect', { class: 'temp-fondo', x: X0 + PASO * 8, y: 8, width: PASO * 8 - 6, height: 240, rx: 6 });
+    el('rect', { class: 'temp-fondo prevista', x: X0 + PASO * 16, y: 8, width: PASO * 2 - 6, height: 240, rx: 6 });
+    el('text', { class: 'temp-tit', x: X0 + 8, y: 24 }, 'T1 · Cerrar la emisora');
+    el('text', { class: 'temp-tit', x: X0 + PASO * 8 + 8, y: 24 }, 'T2');
+    el('text', { class: 'temp-tit', x: X0 + PASO * 16 + 8, y: 24 }, 'T3 prevista');
+    for (let i = 0; i < 16; i++) el('text', { class: 'ep', x: x(i) - 8, y: 38 }, 'E' + String(i % 8 + 1).padStart(2, '0'));
+    const sel = arcos.find(a => a.id === 'her');
+    el('rect', { class: 'sel-banda', x: 0, y: sel.y - 16, width: 1400, height: 32 });
+    for (const a of arcos) {
+      const tenue = a.id !== 'her' && !(a.id === 'tel');
+      const fin = Math.min(a.fin, 17);
+      el('path', { class: 'linea ' + (a.estado === 'borrador' ? 'borrador ' : '') + (tenue ? 'tenue' : ''), stroke: a.color, d: `M${x(a.ini)} ${a.y} L${x(fin) - (fin >= 16 ? 0 : 0)} ${a.y}` });
+      for (const p of a.paradas) if (p <= fin) el('circle', { class: 'parada', cx: x(p), cy: a.y, r: 6, fill: a.color, opacity: tenue ? .3 : 1 });
+      el('text', { class: 'etq' + (tenue ? ' tenue' : ''), x: 4, y: a.y - 8 }, a.nom);
+    }
+    // Cómo quedaría
+    if (estado.fin !== base.fin || estado.inicio !== base.inicio) {
+      const y = sel.y + 7;
+      el('path', { class: 'fantasma', stroke: '#d0743c', d: `M${x(estado.inicio)} ${y} L${x(estado.fin)} ${y}` });
+      el('circle', { cx: x(estado.fin), cy: y, r: 5, fill: '#d0743c' });
+    }
+    // Hueco de La cinta oculta (E02-E05)
+    el('text', { class: 'etq', x: x(2), y: 186, fill: '#e07a5f', style: 'fill:#e07a5f;font-size:11px' }, '— desaparece 4 episodios —');
+  }
+
+  function efectos(estado) {
+    const out = [];
+    const nombres = i => (i < 8 ? 'T1 · E0' + (i + 1) : 'T2 · E0' + (i - 7));
+    if (estado.fin !== base.fin) {
+      const nuevos = []; for (let i = Math.min(base.fin, estado.fin) + 1; i <= Math.max(base.fin, estado.fin); i++) nuevos.push(nombres(i));
+      out.push({ ico: '◐', t: (estado.fin > base.fin ? 'El arco pasa también por ' : 'El arco deja de pasar por ') + nuevos.join(', '), s: nuevos.length + ' episodios cambian su lista de arcos' });
+      if (estado.fin === 7) out.push({ ico: '⟷', t: 'Coincide con el final de «Voces cruzadas» en E08', s: 'Dos arcos B/C cierran en el mismo episodio' });
+      if (estado.fin >= 8 && estado.nivel === 't1') out.push({ mal: true, ico: '▲', t: '<b>G13 · Guía de Atelier</b> — Un arco de temporada se cierra dentro de su temporada.', s: 'Termina en T2 pero su nivel es Temporada 1. Cámbialo a «Toda la serie» o ciérralo en T1.' });
+      if (estado.fin >= 8) out.push({ ico: '◆', t: 'Nando sigue enfrentado a Telmo al empezar T2', s: 'Afecta a la ficha [[Nando]]: estado al empezar T2' });
+    }
+    if (estado.nivel === 'serie') out.push({ ico: '◎', t: 'Pasa a ser arco de serie', s: 'Necesitará tramos por temporada (T2, T3)' });
+    if (estado.inicio !== base.inicio) out.push({ ico: '◐', t: 'Empieza antes, en T1 · E02 El aviso', s: 'Nando tendría que estar presente cuando Telmo firma' });
+    out.push({ mal: true, ico: '▲', t: '<b>G14 · Guía de Atelier</b> — Que ningún arco desaparezca demasiados episodios seguidos.', s: 'No es de este arco: «La cinta oculta» desaparece de E02 a E05.' });
+    document.getElementById('efectos').innerHTML = out.length ? out.map(e => `<div class="efecto ${e.mal ? 'mal' : ''}"><span class="ico">${e.ico}</span><div>${e.t}<small>${e.s}</small></div></div>`).join('') : '<p class="vacio">Sin cambios.</p>';
+    document.getElementById('acciones').hidden = !(estado.fin !== base.fin || estado.inicio !== base.inicio || estado.nivel !== base.nivel);
+  }
+
+  function leer() {
+    const estado = { nivel: nivel.value, inicio: +inicio.value, fin: +fin.value };
+    document.querySelectorAll('.campo').forEach(c => c.classList.remove('cambiado'));
+    if (estado.fin !== base.fin) fin.parentElement.classList.add('cambiado');
+    if (estado.inicio !== base.inicio) inicio.parentElement.classList.add('cambiado');
+    if (estado.nivel !== base.nivel) nivel.parentElement.classList.add('cambiado');
+    dibujar(estado); efectos(estado);
+  }
+  const nivel = document.getElementById('nivel'), inicio = document.getElementById('inicio'), fin = document.getElementById('fin');
+  [nivel, inicio, fin].forEach(s => s.addEventListener('change', leer));
+  leer();
+</script>
+</body>
+</html>

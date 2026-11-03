@@ -1,0 +1,743 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boceto H · Atelier v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* Tokens y componentes copiados tal cual de la v1 (src/estilo). */
+/* Copiado de la maqueta de la v1 (la maqueta manda en lo visual). */
+/* Fuentes dentro del programa (spec 5.7). Licencia OFL: ver LICENCIA-*.txt */
+
+:root{
+  --bg:#F4F2EE; --side:#EEEBE5; --surface:#FFFFFF; --surface-2:#FAF9F6; --hover:rgba(28,26,22,.045); --sel:rgba(28,26,22,.075);
+  --ink:#1D1B18; --ink-2:#57534C; --ink-3:#8D887F; --line:rgba(28,26,22,.09); --line-2:rgba(28,26,22,.16);
+  --accent:#A4492A; --accent-ink:#FFFFFF; --accent-soft:rgba(164,73,42,.10);
+  --plus:#B88A2E; --minus:#4F6F96; --warn:#C0562F; --ok:#4F8A64;
+  --t1:#B5603C; --t2:#5E7FA8; --t3:#7D6A9E; --t4:#5E8F73; --t5:#B26A7E; --t6:#8E8A3E;
+  --shadow:0 1px 2px rgba(28,26,22,.05),0 8px 24px rgba(28,26,22,.06);
+  --serif:"Instrument Serif",Georgia,serif; --sans:"Geist",system-ui,sans-serif; --mono:"Geist Mono",ui-monospace,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141416; --side:#18181B; --surface:#1E1E22; --surface-2:#1A1A1E; --hover:rgba(255,255,255,.045); --sel:rgba(255,255,255,.08);
+  --ink:#ECE9E3; --ink-2:#A9A49B; --ink-3:#77736C; --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.15);
+  --accent:#D9774F; --accent-ink:#1A1310; --accent-soft:rgba(217,119,79,.14);
+  --plus:#D4AA55; --minus:#7E9CC4; --warn:#E07A52; --ok:#78B48C;
+  --t1:#D3805B; --t2:#7FA0CA; --t3:#A18CC4; --t4:#7DB394; --t5:#D08AA0; --t6:#B3AE5E;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#141416; --side:#18181B; --surface:#1E1E22; --surface-2:#1A1A1E; --hover:rgba(255,255,255,.045); --sel:rgba(255,255,255,.08);
+  --ink:#ECE9E3; --ink-2:#A9A49B; --ink-3:#77736C; --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.15);
+  --accent:#D9774F; --accent-ink:#1A1310; --accent-soft:rgba(217,119,79,.14);
+  --plus:#D4AA55; --minus:#7E9CC4; --warn:#E07A52; --ok:#78B48C;
+  --t1:#D3805B; --t2:#7FA0CA; --t3:#A18CC4; --t4:#7DB394; --t5:#D08AA0; --t6:#B3AE5E;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25); color-scheme:dark;}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:13px/1.45 var(--sans);-webkit-font-smoothing:antialiased;font-feature-settings:"ss01","tnum"}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+/* Copiado de la maqueta de la v1 (la maqueta manda en lo visual). */
+/* Clases comunes de las vistas, tal cual en la maqueta. */
+.i{width:15px;height:15px;stroke-width:1.75;flex:none}
+.app{display:grid;grid-template-columns:236px minmax(0,1fr);height:100vh}
+
+.side{background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:12px 10px;gap:2px;overflow:auto}
+.brand{display:flex;align-items:center;gap:8px;padding:4px 8px 12px;color:var(--ink-3);font-size:12px}
+.brand b{font:400 21px/1 var(--serif);color:var(--ink)}
+.switch{display:flex;align-items:center;gap:10px;padding:8px;border-radius:9px;border:1px solid var(--line);background:var(--surface);margin-bottom:14px;box-shadow:var(--shadow);text-align:left}
+.switch .av{width:28px;height:28px;border-radius:7px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font:400 17px/1 var(--serif)}
+.switch .nm{font-weight:500;flex:1}.switch small{display:block;color:var(--ink-3);font-size:11px;font-weight:400}
+.sh{font-size:11px;color:var(--ink-3);padding:12px 8px 4px;display:flex;justify-content:space-between;align-items:center}
+.sh button{color:var(--ink-3);display:flex}.sh button:hover{color:var(--ink)}
+.nav{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:6px;color:var(--ink-2);text-align:left;width:100%}
+.nav:hover{background:var(--hover);color:var(--ink)}
+.nav.on{background:var(--sel);color:var(--ink);font-weight:500}
+.nav .ct{margin-left:auto;font:11px var(--mono);color:var(--ink-3)}
+.nav .lv{margin-left:auto;font:10.5px var(--mono);color:var(--ink-3)}
+.nav.ghost{color:var(--ink-3)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none}
+.nav .dot{margin:0 3.5px}
+.sync{margin-top:auto;padding:10px 8px 2px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:flex-start;color:var(--ink-3);font-size:11.5px}
+.sync .i{color:var(--ok);margin-top:1px}.sync code{font:10.5px var(--mono);display:block}
+
+.main{display:grid;grid-template-rows:52px minmax(0,1fr);min-width:0}
+.top{display:flex;align-items:center;gap:10px;padding:0 14px 0 18px;border-bottom:1px solid var(--line)}
+.crumb{display:flex;align-items:center;gap:6px;color:var(--ink-3);min-width:0;white-space:nowrap;overflow:hidden}
+.crumb button:hover{color:var(--ink)}.crumb .cur{color:var(--ink);font-weight:500}
+.crumb .i{width:13px;height:13px}
+.seg{display:flex;background:var(--hover);border-radius:9px;padding:2px;margin-left:auto}
+.seg button{padding:5px 11px;border-radius:7px;color:var(--ink-2);display:flex;gap:6px;align-items:center;white-space:nowrap}
+.seg button .n{font:10.5px var(--mono);color:var(--ink-3)}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow);font-weight:500}
+.cmd{display:flex;align-items:center;gap:8px;color:var(--ink-3);border:1px solid var(--line);border-radius:8px;padding:5px 8px 5px 10px;background:var(--surface);width:190px;white-space:nowrap;flex:none}
+@media (max-width:1500px){.cmd{width:auto}.cmd .lbl{display:none}}
+.cmd kbd{margin-left:auto;font:10.5px var(--mono);border:1px solid var(--line);border-radius:4px;padding:0 5px}
+.ib{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--ink-2);position:relative}
+.ib:hover{background:var(--hover);color:var(--ink)}
+.ib .bdg{position:absolute;top:3px;right:2px;min-width:15px;height:15px;border-radius:8px;background:var(--warn);color:#fff;font:600 9.5px/15px var(--sans);padding:0 4px}
+.vsep{width:1px;height:20px;background:var(--line)}
+
+.body{display:grid;grid-template-columns:minmax(0,1fr) 352px;min-height:0}
+.view{overflow:auto;padding:28px 36px 60px}
+.insp{border-left:1px solid var(--line);background:var(--surface-2);overflow:auto;display:flex;flex-direction:column}
+
+.eyebrow{font-size:11.5px;color:var(--ink-3);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+h1.t{font:400 42px/1.05 var(--serif);margin:6px 0 8px;letter-spacing:-.01em}
+.logline{font:italic 400 19px/1.4 var(--serif);color:var(--ink-2);margin:0;max-width:62ch}
+.vh{display:flex;align-items:flex-end;gap:24px;margin-bottom:26px}
+.vh .meta{margin-left:auto;display:flex;gap:8px;align-items:center;flex:none}
+.pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:11.5px;color:var(--ink-2);background:var(--surface);white-space:nowrap}
+.pill.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 35%,transparent);background:color-mix(in srgb,var(--warn) 8%,var(--surface))}
+.pill .i{width:13px;height:13px}
+.tipo{font:600 10px/1 var(--mono);border:1px solid var(--line-2);border-radius:4px;padding:3px 5px;color:var(--ink-2)}
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);border-radius:8px;padding:6px 11px;background:var(--surface);color:var(--ink);font-weight:500;white-space:nowrap}
+.btn:hover{background:var(--surface-2)}
+.btn.pri{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--ink-2)}
+.btn.ghost:hover{background:var(--hover)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.sec{margin-bottom:24px}
+.sec-h{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.sec-h h2{font-size:12px;font-weight:500;color:var(--ink-2);margin:0}
+.sec-h .tools{margin-left:auto;display:flex;gap:6px}
+
+.board{padding:16px 20px 12px}
+.row{display:grid;grid-template-columns:172px minmax(0,1fr);align-items:center;min-height:44px}
+.r3 .row{grid-template-columns:172px minmax(0,1fr) 64px}
+.row+.row{border-top:1px dashed var(--line)}
+.rl{display:flex;align-items:center;gap:9px;color:var(--ink-2);font-size:12.5px;padding-right:12px;min-width:0}
+.rl .sw{width:10px;height:10px;border-radius:3px;flex:none}
+.rl .nm{color:var(--ink);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.rl small{display:block;color:var(--ink-3);font-size:11px;font-weight:400}
+.rl.click{cursor:pointer}.rl.click:hover .nm{text-decoration:underline;text-decoration-color:var(--line-2);text-underline-offset:3px}
+.gut{font-size:11px;color:var(--ink-3);display:flex;align-items:center;gap:3px;padding-left:10px;white-space:nowrap}
+.trk{position:relative;height:44px}
+.trk.tall{height:84px}
+.seas{position:absolute;top:7px;bottom:7px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface-2);display:flex;align-items:center;gap:8px;padding:0 10px;font-weight:500;cursor:pointer;overflow:hidden;white-space:nowrap}
+.seas:hover{border-color:var(--ink-3)}
+.seas.cur{border-color:var(--accent);background:var(--accent-soft)}
+.seas.plan{border-style:dashed;color:var(--ink-3);background:transparent}
+.seas small{color:var(--ink-3);font:11px var(--mono)}
+.seas .cg{margin-left:auto}
+.ln{position:absolute;top:50%;height:4px;margin-top:-2px;border-radius:2px}
+.ln.fade{-webkit-mask:linear-gradient(90deg,#000 75%,transparent);mask:linear-gradient(90deg,#000 75%,transparent)}
+.ln.m-borrador{opacity:.6;-webkit-mask:repeating-linear-gradient(90deg,#000 0 10px,transparent 10px 15px);mask:repeating-linear-gradient(90deg,#000 0 10px,transparent 10px 15px)}
+.ln.m-idea{opacity:.45;height:2px;margin-top:-1px;-webkit-mask:repeating-linear-gradient(90deg,#000 0 3px,transparent 3px 7px);mask:repeating-linear-gradient(90deg,#000 0 3px,transparent 3px 7px)}
+.st{position:absolute;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;cursor:pointer}
+.st svg{display:block}
+.cont{position:absolute;top:50%;transform:translateY(-50%);font-size:11px;color:var(--ink-3);display:flex;align-items:center;gap:3px;padding-left:6px}
+.beat{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;cursor:pointer}
+.beat .bd{width:28px;height:28px;border-radius:50%;background:var(--surface);border:1.5px solid var(--t1);display:grid;place-items:center;color:var(--t1)}
+.beat .bd .i{width:14px;height:14px;stroke-width:2}
+.beat.key .bd{background:var(--t1);color:var(--surface)}
+.beat .bl{position:absolute;top:32px;font-size:11px;color:var(--ink-2);white-space:nowrap}
+.beat.up .bl{top:auto;bottom:32px}
+.bomb{position:absolute;top:50%;transform:translate(-50%,-118%);width:20px;height:20px;border-radius:6px;background:color-mix(in srgb,var(--warn) 12%,var(--surface));border:1px solid color-mix(in srgb,var(--warn) 45%,transparent);color:var(--warn);display:grid;place-items:center;z-index:2}
+.bomb .i{width:12px;height:12px;stroke-width:2}
+.bomb::after{content:"";position:absolute;left:50%;top:100%;width:1px;height:5px;background:color-mix(in srgb,var(--warn) 60%,transparent)}
+.ticks{display:grid;position:absolute;inset:0;pointer-events:none}
+.ticks i{border-left:1px solid var(--line)}
+.ticks i:first-child{border-left:0}
+.slab{position:absolute;top:2px;font:11px var(--mono);color:var(--ink-3)}
+
+.cg{display:inline-flex;align-items:center;gap:5px;font:500 11px var(--mono);color:var(--ink-2)}
+.cg svg{display:block}
+
+.beats4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:22px}
+.bx{padding:14px 16px;border-radius:12px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);cursor:text;min-height:112px;display:flex;flex-direction:column;gap:8px}
+.bx:hover{border-color:var(--line-2)}
+.bx h3{margin:0;font-size:11.5px;font-weight:500;color:var(--ink-3);display:flex;align-items:center;gap:7px}
+.bx h3 .i{width:14px;height:14px}
+.bx h3 .ref{margin-left:auto;font:10.5px var(--mono);color:var(--ink-3);opacity:.8}
+.bx p{margin:0;font:400 17px/1.3 var(--serif);color:var(--ink)}
+.bx p.hint{font:italic 15px/1.35 var(--serif);color:var(--ink-3)}
+.bx.empty{border-style:dashed;box-shadow:none;background:transparent}
+.bx ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+.bx li{display:flex;gap:7px;align-items:center;font-size:12.5px}
+.bx.hook{background:color-mix(in srgb,var(--accent) 6%,var(--surface));border-color:color-mix(in srgb,var(--accent) 25%,transparent)}
+.bx.hook h3{color:var(--accent)}
+.bx.bombx:not(.empty){background:color-mix(in srgb,var(--warn) 5%,var(--surface));border-color:color-mix(in srgb,var(--warn) 22%,transparent)}
+.bx.bombx h3{color:var(--warn)}
+.q{display:flex;gap:10px;align-items:baseline;margin:-10px 0 24px;color:var(--ink-2)}
+.q b{font-weight:500;color:var(--ink-3);font-size:11.5px}
+.q span{font:italic 17px/1.35 var(--serif);color:var(--ink)}
+
+.epcols{display:grid}
+.eph{padding:2px 0 8px;text-align:center;cursor:pointer;border-radius:6px}
+.eph:hover{background:var(--hover)}
+.eph b{display:block;font:500 11px var(--mono);color:var(--ink-2)}
+.eph .sd{display:inline-block;width:6px;height:6px;border-radius:50%;margin-top:4px}
+.curve{height:44px;position:relative}
+.curve svg{position:absolute;inset:4px 0;width:100%;height:calc(100% - 8px)}
+.wm{position:absolute;top:2px;transform:translateX(-50%);color:var(--warn);background:var(--surface);border-radius:50%;display:grid;place-items:center;width:18px;height:18px;cursor:pointer;z-index:2}
+.wm .i{width:13px;height:13px;stroke-width:2.2}
+
+.tray{display:flex;flex-wrap:wrap;gap:8px;padding:14px 16px;border:1px dashed var(--line-2);border-radius:12px;background:var(--surface-2);align-items:center}
+.tray .lbl{display:flex;align-items:center;gap:7px;color:var(--ink-3);font-size:12px;margin-right:6px}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:5px 10px;border-radius:8px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);cursor:grab;font-size:12.5px}
+.chip.add{box-shadow:none;background:transparent;color:var(--ink-3);border-style:dashed;cursor:pointer}
+
+.grid-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface);box-shadow:var(--shadow)}
+.grid{display:grid;min-width:max-content}
+.g-c{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:8px;min-height:76px;display:flex;flex-direction:column;gap:6px;background:var(--surface)}
+.g-c.empty:hover{background:var(--surface-2)}
+.g-c.empty:hover::after{content:"+ evento";color:var(--ink-3);font-size:11.5px;margin:auto}
+.g-h{position:sticky;top:0;z-index:3;background:var(--surface-2);border-right:1px solid var(--line);border-bottom:1px solid var(--line-2);padding:10px 10px 8px;cursor:pointer;display:flex;flex-direction:column;gap:5px}
+.g-h:hover{background:var(--surface)}
+.g-h .id{font:500 11px var(--mono);color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.g-h .ti{font:400 16px/1.15 var(--serif);color:var(--ink)}
+.g-h .ft{display:flex;align-items:center;gap:6px;justify-content:space-between}
+.g-l{position:sticky;left:0;z-index:2;background:var(--surface-2);border-right:1px solid var(--line-2);border-bottom:1px solid var(--line);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.g-l .bar{width:3px;align-self:stretch;border-radius:2px}
+.g-l .nm{font-weight:500}.g-l small{display:block;color:var(--ink-3);font-size:11px}
+.g-corner{position:sticky;left:0;top:0;z-index:4;background:var(--surface-2);border-right:1px solid var(--line-2);border-bottom:1px solid var(--line-2);padding:10px 12px;color:var(--ink-3);font-size:11px;display:flex;align-items:flex-end}
+.ev{display:flex;gap:8px;align-items:flex-start;padding:7px 9px;border-radius:8px;background:var(--surface);border:1px solid var(--line);font-size:12.5px;line-height:1.3;cursor:pointer;box-shadow:0 1px 1px rgba(0,0,0,.03)}
+.ev:hover{border-color:var(--line-2)}
+.ev.on{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.ev.m-borrador{border-style:dashed;background:transparent;box-shadow:none}
+.ev.m-idea{border-style:dotted;background:transparent;box-shadow:none;color:var(--ink-2)}
+.ev .fl{margin-left:auto;color:var(--warn)}
+.ev svg{flex:none;margin-top:1px}
+.state{font-size:10.5px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface)}
+.state.guion{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
+.state.escaleta{color:var(--t2);border-color:color-mix(in srgb,var(--t2) 40%,transparent)}
+.state.esbozado{color:var(--plus);border-color:color-mix(in srgb,var(--plus) 40%,transparent)}
+
+.legend{display:flex;flex-wrap:wrap;gap:16px;color:var(--ink-3);font-size:11.5px;margin-top:12px;align-items:center}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend .sep{width:1px;height:14px;background:var(--line-2)}
+.mk{display:inline-block;width:22px;height:4px;border-radius:2px;background:var(--ink-3)}
+
+.tw{display:grid;grid-template-columns:268px minmax(0,1fr);gap:24px;align-items:start}
+.tlist{padding:8px;position:sticky;top:0}
+.tl-h{font-size:11px;color:var(--ink-3);padding:10px 10px 6px;display:flex;align-items:center}
+.tl-h button{margin-left:auto;color:var(--ink-3);display:flex;align-items:center;gap:4px;font-size:11px}
+.tl-h button:hover{color:var(--ink)}
+.tl{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;width:100%;text-align:left}
+.tl:hover{background:var(--hover)}
+.tl.on{background:var(--sel)}
+.tl .bar{width:3px;height:28px;border-radius:2px;flex:none}
+.tl .nm{font-weight:500;display:block}
+.tl small{display:block;color:var(--ink-3);font-size:11px}
+.tl .r{margin-left:auto;display:flex;align-items:center;gap:6px}
+.tl.ch{padding-left:26px}
+.tl .wn{color:var(--warn);display:flex}
+.mdot{width:8px;height:8px;border-radius:50%;flex:none;display:inline-block}
+.m-c-idea{border:1.5px dotted var(--ink-3)}.m-c-borrador{border:1.5px dashed var(--plus)}.m-c-canon{background:var(--ok)}.m-c-descartado{background:var(--line-2)}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.gp{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gp .bx{min-height:100px}
+.gp .bx p{font-size:16px}
+.children{display:flex;gap:8px;flex-wrap:wrap}
+.tl.desc{cursor:default;opacity:.7}.tl.desc .nm{text-decoration:line-through;text-decoration-color:var(--ink-3);font-weight:400}
+.beats5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.b5{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:flex;flex-direction:column;gap:3px}
+.b5 .k{font-size:11px;color:var(--ink-3);display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden}.b5 .k .i{width:13px;height:13px}
+.b5 b{font:500 12px var(--mono);color:var(--ink)}
+.b5.empty{border-style:dashed;background:transparent}.b5.empty b{color:var(--ink-3);font-weight:400}
+.smk{position:absolute;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;cursor:pointer;background:var(--surface);border-radius:50%;width:22px;height:22px}
+.smk .i{width:14px;height:14px}
+.row.sepr{min-height:26px;border-top:1px solid var(--line-2)!important}
+.ev small.when{display:flex;align-items:center;gap:4px;color:var(--ink-3);font-size:11px;margin-top:3px}
+.wk.miss{background:transparent;border:1px dashed var(--line-2)}.wk .mt{font-size:10.5px;color:var(--warn)}
+.cklist .it.sug .i{color:var(--plus)}
+
+.ih{padding:18px 20px 0;border-bottom:1px solid var(--line)}
+.ih .k{font-size:11px;color:var(--ink-3);display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.ih .k .i{width:13px;height:13px}
+.ih h3{margin:0 0 12px;font:400 26px/1.1 var(--serif)}
+.tabs{display:flex;gap:16px}
+.tabs button{padding:8px 0 10px;color:var(--ink-3);border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:6px}
+.tabs button.on{color:var(--ink);border-color:var(--ink);font-weight:500}
+.tabs .n{font:600 10px/16px var(--sans);min-width:16px;height:16px;border-radius:8px;background:var(--warn);color:#fff;text-align:center;padding:0 4px}
+.ib-body{padding:16px 20px;display:flex;flex-direction:column;gap:14px}
+.f label{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-3);margin-bottom:5px}
+.f label .ref{margin-left:auto;font:10.5px var(--mono);opacity:.8}
+.f .v{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:7px 10px;min-height:34px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.f .v:hover{border-color:var(--line-2)}
+.f .v.ta{align-items:flex-start;min-height:60px;font:400 15px/1.35 var(--serif);color:var(--ink)}
+.f .v.ph{color:var(--ink-3);font-style:italic;border-style:dashed;background:transparent}
+.f .v.ph.ta{font:italic 14.5px/1.35 var(--serif)}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tg{display:inline-flex;background:var(--hover);border-radius:7px;padding:2px;flex-wrap:wrap}
+.tg button{padding:3px 10px;border-radius:5px;color:var(--ink-3);font:500 12px var(--mono)}
+.tg button.on{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.tg.sm button{font:500 11px var(--sans);padding:3px 8px;display:inline-flex;align-items:center;gap:5px}
+.chk{display:flex;align-items:flex-start;gap:9px;padding:7px 0;font-size:12.5px}
+.chk+.chk{border-top:1px solid var(--line)}
+.chk .bx2{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--line-2);flex:none;margin-top:1px;display:grid;place-items:center}
+.chk .bx2.on{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.chk .bx2 .i{width:11px;height:11px;stroke-width:3}
+.chk small{display:block;color:var(--ink-3);font-size:11px}
+.rolrow{display:flex;align-items:center;gap:8px;padding:6px 0;flex-wrap:wrap}
+.rolrow+.rolrow{border-top:1px solid var(--line)}
+.rolrow .nm{flex:1;display:flex;align-items:center;gap:7px;min-width:110px}
+.wk{display:inline-flex;align-items:center;gap:6px;padding:2px 8px 2px 4px;border-radius:6px;background:var(--hover);font:400 12px var(--sans);color:var(--ink);font-style:normal}
+.wk .ini{width:18px;height:18px;border-radius:5px;display:grid;place-items:center;font:500 10px var(--sans);background:var(--surface);border:1px solid var(--line);color:var(--ink-2)}
+.wk .i{width:12px;height:12px;color:var(--ink-3)}
+.ifoot{margin-top:auto;padding:12px 20px;border-top:1px solid var(--line);display:flex;align-items:center;gap:8px;color:var(--ink-3);font-size:11.5px}
+.ifoot .i{width:13px;height:13px;color:var(--ok)}
+.ifoot .sp{margin-left:auto}
+.warnbox{display:flex;gap:9px;padding:10px 12px;border-radius:8px;background:color-mix(in srgb,var(--warn) 8%,var(--surface));border:1px solid color-mix(in srgb,var(--warn) 30%,transparent);color:var(--ink);font-size:12.5px;line-height:1.4}
+.warnbox .i{color:var(--warn);margin-top:1px}
+.warnbox.info{background:var(--surface);border-color:var(--line)}
+.warnbox.info .i{color:var(--ink-3)}
+.wkpath{font:11px var(--mono);color:var(--ink-3)}
+.maxim{padding:12px 0;display:flex;gap:12px;align-items:flex-start}
+.maxim+.maxim{border-top:1px solid var(--line)}
+.maxim .ref{font:500 10.5px var(--mono);color:var(--accent);background:var(--accent-soft);border-radius:4px;padding:2px 5px;flex:none;margin-top:2px}
+.maxim p{margin:0;font:400 15.5px/1.38 var(--serif);color:var(--ink)}
+.maxim .st2{margin-left:auto;flex:none;margin-top:3px}
+.gsrc{font-size:11.5px;color:var(--ink-3);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.cklist .it{display:flex;gap:10px;padding:11px 0;cursor:pointer;align-items:flex-start}
+.cklist .it+.it{border-top:1px solid var(--line)}
+.cklist .it:hover p{color:var(--ink)}
+.cklist .it .i{color:var(--warn);margin-top:2px}
+.cklist p{margin:0;font-size:12.5px;color:var(--ink-2);line-height:1.4}
+.cklist small{display:flex;gap:8px;color:var(--ink-3);font-size:11px;margin-top:3px}
+.cklist small b{font:500 10.5px var(--mono);color:var(--accent)}
+.cklist .grp{font-size:11px;color:var(--ink-3);padding:12px 0 2px}
+
+/* Añadido en Atelier: los campos de la maqueta como controles de verdad */
+input.v,textarea.v,select.v{width:100%;font:inherit;color:var(--ink);outline:none;-webkit-appearance:none;appearance:none}
+textarea.v{resize:none;overflow:hidden;display:block}
+textarea.v.ta{font:400 15px/1.35 var(--serif)}
+input.v.mono{font:12px var(--mono)}
+input.v:focus,textarea.v:focus,select.v:focus{border-color:var(--accent);border-style:solid;font-style:normal;background:var(--surface)}
+.f .v.ph::placeholder{color:var(--ink-3)}
+.f .v::placeholder{color:var(--ink-3);font-style:italic}
+select.v{cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,var(--ink-3) 50%),linear-gradient(135deg,var(--ink-3) 50%,transparent 50%);background-position:calc(100% - 15px) 50%,calc(100% - 10px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:26px}
+/* El panel derecho mide lo que la ventana y su pie se queda siempre a la vista */
+.app,.body{grid-template-rows:minmax(0,1fr)}
+.main{min-height:0}
+.ifoot{position:sticky;bottom:0;background:var(--surface-2);z-index:2}
+
+/* ---- Añadido en el boceto H: visor con zoom, crear, guía, «¿Y si…?» ---- */
+.visor{margin-bottom:22px;overflow:hidden}
+.visor .vtop{display:flex;align-items:center;gap:8px;padding:12px 20px 0}
+.visor .vtop .crumb{font-size:12.5px}
+.visor .vtop .crumb button{padding:2px 4px;border-radius:5px}
+.visor .vtop .crumb button:hover{background:var(--hover)}
+.visor .vtop .crumb .cur{padding:2px 4px}
+.visor .vtop .zoomh{margin-left:auto;font-size:11px;color:var(--ink-3);display:flex;gap:6px;align-items:center}
+.visor .board{padding:10px 20px 12px;animation:zoomin .22s ease-out}
+.visor.sube .board{animation:zoomout .22s ease-out}
+@keyframes zoomin{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+@keyframes zoomout{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
+.colh{position:absolute;top:7px;bottom:7px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface-2);display:flex;align-items:center;gap:8px;padding:0 10px;font-weight:500;cursor:zoom-in;overflow:hidden;white-space:nowrap}
+.colh:hover{border-color:var(--accent);background:var(--accent-soft)}
+.colh.cur{border-color:var(--accent);background:var(--accent-soft)}
+.colh.plan{border-style:dashed;color:var(--ink-3);background:transparent}
+.colh small{color:var(--ink-3);font:11px var(--mono)}
+.colh .ti{font:400 15px/1.1 var(--serif);overflow:hidden;text-overflow:ellipsis}
+.colh .cg{margin-left:auto}
+.colh.mal{border-color:color-mix(in srgb,var(--warn) 55%,transparent)}
+.trk.dim .ln,.trk.dim .st{opacity:.25}
+.rl.dim{opacity:.45}
+.fantasma{position:absolute;top:50%;height:0;margin-top:5px;border-top:2.5px dashed var(--accent)}
+.olv{position:absolute;top:50%;height:14px;margin-top:-7px;border-radius:3px;background:repeating-linear-gradient(45deg,transparent 0 4px,color-mix(in srgb,var(--warn) 22%,transparent) 4px 8px)}
+.stl{position:absolute;top:calc(50% + 9px);transform:translateX(-50%);font-size:10.5px;color:var(--ink-3);white-space:nowrap;pointer-events:none}
+.secm{position:absolute;top:50%;transform:translate(-50%,-50%);color:var(--ink-2)}
+.secm.rev{color:var(--accent)}.secm.mal{color:var(--warn)}
+.secm .i{width:15px;height:15px}
+.vacio-v{color:var(--ink-3);font:italic 15px var(--serif);padding:14px 0}
+.crearbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:-8px 0 22px}
+.crearbar .lbl{font-size:11px;color:var(--ink-3);margin-right:4px}
+.crearbar .btn{border-style:dashed;font-weight:400;color:var(--ink-2)}
+.crearbar .btn:hover{border-color:var(--accent);color:var(--accent)}
+.ysi-on .top{background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.ysibar{display:none;align-items:center;gap:10px;padding:8px 18px;border-bottom:1px solid color-mix(in srgb,var(--accent) 30%,transparent);background:color-mix(in srgb,var(--accent) 8%,var(--bg));font-size:12.5px}
+.ysi-on .ysibar{display:flex}
+.ysibar .sp{margin-left:auto;display:flex;gap:6px}
+.main{grid-template-rows:52px auto minmax(0,1fr)!important}
+.f .pista{display:none;margin-top:6px}
+.f:focus-within .pista{display:flex}
+.maxim .st2 .i{width:15px;height:15px}
+.maxim small{display:block;font:11px var(--sans);color:var(--ink-3);margin-top:3px}
+.velo{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:50}
+.velo.on{display:flex}
+.vent{width:min(880px,94vw);display:grid;grid-template-columns:minmax(0,1fr) 340px;overflow:hidden}
+.vent .izq{padding:20px 22px}
+.vent .der{background:var(--surface-2);border-left:1px solid var(--line);padding:16px 18px;max-height:72vh;overflow:auto}
+.vent h2{font:400 30px/1.1 var(--serif);margin:4px 0 14px}
+.ruta{font:11px var(--mono);color:var(--ink-3);background:var(--hover);border-radius:6px;padding:7px 9px;margin:12px 0 16px}
+.opc{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opc button{border:1px solid var(--line);border-radius:10px;padding:10px;text-align:left;background:var(--surface)}
+.opc button.on{border-color:var(--accent);background:var(--accent-soft)}
+.opc small{display:block;color:var(--ink-3);font-size:11px;margin-top:2px}
+.toast{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:60;display:none}
+.toast.on{display:flex}
+.nota-b{position:fixed;left:250px;bottom:10px;font-size:11.5px;color:var(--ink-3);background:var(--surface);border:1px dashed var(--line-2);border-radius:8px;padding:6px 10px;max-width:620px;z-index:5}
+
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="side" id="side"></aside>
+  <div class="main">
+    <header class="top">
+      <div class="crumb" id="crumbTop"></div>
+      <div class="seg" id="seg"></div>
+      <div class="cmd"><i data-lucide="search" class="i"></i><span class="lbl">Buscar o crear</span><kbd>Ctrl K</kbd></div>
+      <button class="btn" id="ysi"><i data-lucide="flask-conical" class="i"></i>¿Y si…?</button>
+      <button class="btn pri" data-nuevo="idea"><i data-lucide="plus" class="i"></i>Idea</button>
+      <div class="vsep"></div>
+      <button class="ib" id="tema" title="Tema claro u oscuro"><i data-lucide="sun-moon" class="i"></i></button>
+    </header>
+    <div class="ysibar"><i data-lucide="flask-conical" class="i" style="color:var(--accent)"></i><b>¿Y si…?</b><span class="pill">Nando se va en E05</span><span style="color:var(--ink-2)">Ves cómo quedaría. Nada toca la serie hasta que pulses «Aplicar».</span>
+      <div class="sp"><button class="btn ghost" id="ysiVer">Ver ahora</button><button class="btn">Aparcar</button><button class="btn">Descartar</button><button class="btn pri">Aplicar</button></div></div>
+    <div class="body">
+      <main class="view" id="view"></main>
+      <aside class="insp" id="insp"></aside>
+    </div>
+  </div>
+</div>
+<div class="velo" id="velo"><div class="vent card" id="vent"></div></div>
+<div class="toast warnbox info" id="toast"></div>
+<div class="nota-b" id="nota"></div>
+
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script>
+const REGLAS = [["G01", "serie", "Las 10-11 preguntas, como lista antes de dar la historia por planeada.", "§29", ""], ["G02", "serie", "Decide el final antes de escribir, aunque sea en una línea.", "§18 · F1.6", "C18"], ["G03", "serie", "La pregunta de oro nace al inicio; el final la responde.", "§18", ""], ["G04", "serie", "Todo nace de los personajes enfrentándose a sus creencias: conflicto externo, interno y filosófico.", "§3", ""], ["G05", "serie", "Logline: protagonista, objetivo, problema, acción y catalizador. Si no cabe en un párrafo, es pronto.", "§4", ""], ["G06", "serie", "Define la dinámica de la historia y repítela: siempre conflicto, cada vez más difícil, y cada capítulo acerca a la meta.", "§25", ""], ["G07", "arco de trama", "Deja muy claro qué quiere y por qué lo quiere.", "§10", "C03"], ["G08", "arco de trama", "Todo conflicto trae algo que ganar y algo que perder.", "§10", "C03"], ["G09", "arco de trama", "El riesgo es relativo a la situación del personaje, no absoluto.", "§10", ""], ["G10", "arco de trama", "Bomba de tiempo: una cuenta atrás que, al llegar a cero, hace estallar la consecuencia.", "§10", "C03"], ["G11", "arco de trama", "Usa las consecuencias como motor: dos pasos adelante, uno atrás.", "§3", ""], ["G12", "arco de trama", "La trama principal llega hasta el final de la serie: no la cierres antes del último episodio.", "§12", "C12"], ["G13", "arco de trama", "Un arco de temporada se cierra dentro de su temporada.", "§12", "C10"], ["G14", "arco de trama", "Que ningún arco desaparezca demasiados episodios seguidos: el público lo olvida.", "§25", "C11"], ["G15", "arco de trama", "Si fijas a mano dónde empieza o acaba, que coincida con los eventos que lo abren y lo cierran.", "Diseño 4.4", "C13"], ["G16", "subtrama", "Dale su propio protagonista y su propio conflicto.", "§13", "C05"], ["G17", "subtrama", "Arranca después de presentar la principal y se resuelve antes.", "§13", "C06"], ["G18", "subtrama", "Proporción 70/30 entre la principal y la subtrama.", "§13", "C07"], ["G19", "subtrama", "Únela a la principal por trama o, mejor, por tema.", "§13", ""], ["G20", "subtrama", "En B y C la bomba de tiempo no es obligatoria, pero ayuda.", "§10", "C04"], ["G21", "arco de personaje", "Separa la razón que se da a sí mismo de su razón real.", "§3", ""], ["G22", "arco de personaje", "El choque entre lo que quiere y lo que necesita es su arco.", "Met. 1.6", "C17"], ["G23", "arco de personaje", "El cambio es gradual: creencias que se traducen en acciones.", "§3", ""], ["G24", "arco de personaje", "Su final llega cuando aprende la lección sobre su defecto inicial.", "§18", ""], ["G25", "arco de personaje", "Anota cómo está al empezar y al terminar cada temporada.", "Plantilla Temporada", "C17"], ["G26", "arco de relación", "Un arco de relación cuenta cómo cambia un vínculo: de dónde parte y a dónde llega.", "Plantilla Arco", ""], ["G27", "arco de relación", "Usa las consecuencias como motor: dos pasos adelante, uno atrás.", "§3", ""], ["G28", "arco de relación", "Si es romance: tal vez sí, tal vez no, y una separación que parece irreversible antes de resolverse.", "§26", ""], ["G29", "temporada", "Cada temporada recorre su propio Story Circle y deja un gancho.", "§12", ""], ["G30", "temporada", "Punto de crisis: lo peor que le puede pasar, justo antes del clímax.", "§17", ""], ["G31", "temporada", "Antes del clímax: quién es, qué quiere, qué pasa si falla y quién se opone.", "§17", ""], ["G32", "temporada", "No resuelvas el conflicto general salvo en la última temporada.", "§12", ""], ["G33", "temporada", "Siempre una incógnita abierta: antes de resolver una pregunta, planta otra.", "§11", ""], ["G34", "temporada", "La carga cambia: si empieza en +, acaba en −, y empieza como acabó la anterior.", "§12", "C01"], ["G35", "temporada", "Elige su trama principal: con ella se comprueban las subtramas.", "Decisión D7", "C19"], ["G36", "episodio", "Resume la idea central en una frase. Varias ideas a la vez lo vuelven confuso.", "§12", ""], ["G37", "episodio", "Protagonista del capítulo, deseo, fuerza antagónica, conflicto, acción y contexto.", "§12", ""], ["G38", "episodio", "Si acaba en +, el siguiente empieza en + y acaba en −.", "§12", "C01"], ["G39", "episodio", "Nunca resuelvas el conflicto general dentro de un episodio, salvo en el último.", "§12", ""], ["G40", "episodio", "Que cada episodio acabe con alguna incógnita abierta.", "§11", "C16"], ["G41", "evento", "Cada escena tiene su microconflicto: algo que ganar y algo que perder.", "§10", "C09"], ["G42", "evento", "Toda escena cambia un valor. Si empieza y acaba igual, sobra o se fusiona.", "Escena 1.3 · F5", "C02"], ["G43", "evento", "Test de relleno: ¿hace avanzar a algún protagonista? ¿Da información o desarrolla a alguien?", "§25", "C08"], ["G44", "evento", "Los problemas los resuelve el propio protagonista, nunca otro por él.", "§16", ""], ["G45", "evento", "Si ocurre en otro tiempo del mundo, márcalo: no mezcles la Timeline con el orden de emisión.", "Regla 13", ""], ["G46", "secreto", "Constrúyelo desde el final: decide la revelación y luego siembra las pistas.", "§15 · F4", "C14"], ["G47", "secreto", "Inesperado pero coherente: las pistas tienen que encajar con la revelación.", "§15", "C15"], ["G48", "secreto", "Intriga, suspenso o misterio: decide quién lo sabe, el personaje o el público.", "§11", ""], ["G49", "secreto", "La verdad no se copia en resúmenes ni loglines antes de revelado_en.", "Regla 10", ""], ["M01", "evento", "No resuelvas un conflicto con magia que el público no entiende.", "Magia §1 · Ley 1", ""], ["M02", "secreto", "Siembra las excepciones antes de usarlas: si la revelación o la solución usa magia, el público tiene que entender antes esa regla.", "Magia §6", ""]];
+const $ = id => document.getElementById(id);
+const ic = (n, cls = 'i') => `<i data-lucide="${n}" class="${cls}"></i>`;
+
+/* ---------- Serie de prueba de la v1 ---------- */
+const TEMPS = [
+  { id: 'T01', ti: 'Cerrar la emisora', n: 8, carga: ['+', '−'] },
+  { id: 'T02', ti: 'El apagón', n: 8, carga: ['−', '+'] },
+  { id: 'T03', ti: 'prevista', n: 2, plan: true },
+];
+const EPS = [
+  ['La señal', '+−', 'guion'], ['El aviso', '−+', 'escaleta'], ['Dos micrófonos', '+−', 'escaleta'], ['Primera guardia', '−+', 'escaleta'],
+  ['El apagón', '+−', 'escaleta'], ['La cinta', '−+', 'idea'], ['Voz vieja', '++', 'idea'], ['El pleno', '+−', 'idea'],
+  ['', '−+', 'idea'], ['', '+−', 'idea'], ['', '−+', 'idea'], ['', '+−', 'idea'], ['', '−+', 'idea'], ['', '+−', 'idea'], ['', '−+', 'idea'], ['', '−+', 'idea'],
+].map(([t, c, e]) => ({ t, c: [c[0], c[1]], e }));
+const ARCOS = {
+  tor: { t: 'La tormenta', s: 'A · tramo de El eco', abc: 'A', tipo: 'trama', m: 'canon', c: 'var(--t4)', ini: 2, fin: 4, de: 'ven' },
+  ven: { t: 'El eco', s: 'trama A · canon', abc: 'A', tipo: 'trama', m: 'canon', c: 'var(--t1)', ini: 0, fin: 17 },
+  tel: { t: 'Telmo: callar o avisar', s: 'arco de personaje · borrador', abc: 'A', tipo: 'personaje', m: 'borrador', c: 'var(--t6)', ini: 0, fin: 17 },
+  car: { t: 'La cinta oculta', s: 'trama B · idea', abc: 'B', tipo: 'trama', m: 'idea', c: 'var(--t3)', ini: 5, fin: 17, sinCierre: true },
+  her: { t: 'Amistad rota', s: 'arco de relación · borrador', abc: 'B', tipo: 'relación', m: 'borrador', c: 'var(--t2)', ini: 2, fin: 7, t1: true },
+  amo: { t: 'Voces cruzadas', s: 'arco de relación · borrador', abc: 'C', tipo: 'relación', m: 'borrador', c: 'var(--t5)', ini: 0, fin: 6 },
+};
+// [arco, episodio (0-15), papel, qué pasa]
+const PAR = [
+  ['tor', 2, 'abre', 'Aviso'], ['tor', 3, 'avanza', '1.ª noche'], ['tor', 4, 'cierra', 'Final'],
+  ['ven', 0, 'abre', 'La llegada'], ['ven', 1, 'avanza', 'El aviso'], ['ven', 4, 'gira', 'Primer precio'], ['ven', 7, 'avanza', 'El corte'], ['ven', 12, 'gira', 'El Alcalde'],
+  ['tel', 0, 'abre', 'Calla'], ['tel', 4, 'gira', 'Pide ayuda'], ['tel', 7, 'avanza', 'Obra'],
+  ['car', 5, 'abre', 'La cinta'], ['car', 6, 'avanza', 'Cinta rota'],
+  ['her', 2, 'abre', 'Nando lo sabe'], ['her', 4, 'gira', 'Nando dolido'], ['her', 7, 'avanza', 'Distancia'],
+  ['amo', 0, 'abre', 'Sabela'], ['amo', 3, 'avanza', 'La cita'], ['amo', 6, 'cierra', 'Despedida'],
+];
+const SECRETOS = [
+  { t: 'Quién grabó la cinta', s: 'secreto mayor', marcas: [[2, 'sprout'], [4, 'sprout'], [5, 'ghost']], rev: 10, revT: 'T02E03' },
+  { t: 'El solar nunca fue del Ayuntamiento', s: 'secreto central · sin pistas', marcas: [], rev: 11, revT: 'T02E04', mal: true },
+];
+const PUNTOS = [['Inicio', 0, 'sunrise'], ['Detonante', 1, 'zap', 'up'], ['Giro', 9, 'split'], ['Clímax', 15, 'mountain', 'up', true], ['Fin', 17.5, 'flag']];
+// Escenas del episodio E05 (índice 4), por actos
+const ACTOS = [['teaser', 'Teaser'], ['inicio', 'Inicio'], ['desarrollo', 'Desarrollo'], ['desenlace', 'Desenlace']];
+const ESC = [
+  { id: 'S1', a: 'teaser', t: 'El Alcalde cobra en la plaza', v: ['+', '−'], arcos: [['ven', 'avanza']] },
+  { id: 'S2', a: 'inicio', t: 'Telmo y Nando ensayan; Nando pide hablar en antena', v: ['+', '+'], arcos: [['her', 'avanza'], ['tor', 'avanza']] },
+  { id: 'S3', a: 'inicio', t: 'Sabela acompaña a Telmo', v: ['−', '+'], arcos: [['amo', 'avanza']] },
+  { id: 'S4', a: 'desarrollo', t: 'Segunda emisión: Telmo gana', v: ['−', '+'], arcos: [['tor', 'cierra'], ['ven', 'avanza']] },
+  { id: 'S5', a: 'desarrollo', t: 'Nando duda, dolido', v: ['+', '−'], arcos: [['her', 'gira']] },
+  { id: 'S6', a: 'desenlace', t: 'Telmo mantiene la emisora a costa de Nando', v: ['+', '−'], arcos: [['ven', 'gira'], ['tel', 'gira'], ['her', 'avanza']] },
+];
+
+const st = { nivel: 'serie', temp: 0, ep: 4, esc: 'S5', arco: null, pest: 'efectos', her: 7, herNivel: 't1', ysi: false, ysiVer: true, sube: false, nuevo: null };
+const base = { her: 7 };
+const epId = i => i < 8 ? `T01E0${i + 1}` : i < 16 ? `T02E0${i - 7}` : 'T03';
+const regla = id => REGLAS.find(r => r[0] === id);
+const fuente = f => f.startsWith('§') ? `Chuleta de escritura ${f}` : f;
+const ysiOn = () => st.ysi && st.ysiVer;
+function finArco(k) { let f = k === 'her' ? st.her : ARCOS[k].fin; if (ysiOn() && (k === 'her' || k === 'amo')) f = Math.min(f, 4); return f; }
+
+/* ---------- Dibujo: paradas, carga ---------- */
+function parada(p, c, tam = 16) {
+  const s = `<svg width="${tam}" height="${tam}" viewBox="0 0 16 16">`;
+  if (p === 'abre') return s + `<circle cx="8" cy="8" r="5.2" fill="var(--surface)" stroke="${c}" stroke-width="2.6"/></svg>`;
+  if (p === 'avanza') return s + `<circle cx="8" cy="8" r="3.6" fill="${c}"/></svg>`;
+  if (p === 'gira') return s + `<circle cx="8" cy="8" r="5.2" fill="var(--surface)" stroke="${c}" stroke-width="2"/><path d="M8 2.8A5.2 5.2 0 0 1 8 13.2Z" fill="${c}"/></svg>`;
+  return s + `<rect x="5.6" y="1.4" width="4.8" height="13.2" rx="2.4" fill="${c}"/></svg>`;
+}
+function cg(c) { if (!c) return ''; const y = v => v === '+' ? 3 : 13, k = c[1] === '+' ? 'var(--plus)' : 'var(--minus)'; return `<span class="cg"><svg width="26" height="16"><path d="M3 ${y(c[0])}L23 ${y(c[1])}" stroke="${k}" stroke-width="2" stroke-linecap="round"/><circle cx="3" cy="${y(c[0])}" r="2.2" fill="${k}"/><circle cx="23" cy="${y(c[1])}" r="2.2" fill="${k}"/></svg></span>`; }
+function curva(cargas) {
+  const y = v => v === '+' ? 6 : 34, col = c => c[0] === c[1] ? 'var(--warn)' : c[1] === '+' ? 'var(--plus)' : 'var(--minus)';
+  let h = `<div class="curve"><svg viewBox="0 0 ${cargas.length * 100} 40" preserveAspectRatio="none">`;
+  cargas.forEach((c, i) => { const x0 = i * 100 + 6, x1 = i * 100 + 94, k = col(c);
+    h += `<polygon points="${x0},${y(c[0])} ${x1},${y(c[1])} ${x1},40 ${x0},40" fill="${k}" opacity=".10"/><path d="M${x0} ${y(c[0])}L${x1} ${y(c[1])}" stroke="${k}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round" fill="none" ${c[0] === c[1] ? 'stroke-dasharray="3 4"' : ''}/>`;
+    if (i < cargas.length - 1) h += `<path d="M${x1} ${y(c[1])}L${x1 + 12} ${y(cargas[i + 1][0])}" stroke="var(--line-2)" stroke-width="1.5" vector-effect="non-scaling-stroke" fill="none"/>`; });
+  h += '</svg>';
+  cargas.forEach((c, i) => { const mal = c[0] === c[1] || (i > 0 && c[0] !== cargas[i - 1][1]); if (mal) h += `<span class="wm" style="left:${(i + .5) / cargas.length * 100}%" title="Regla del + y el −">${ic('triangle-alert')}</span>`; });
+  return h + '</div>';
+}
+
+/* ---------- Visor con zoom ---------- */
+// Cada nivel define sus columnas en «unidades» y a qué episodio corresponde cada una.
+function columnas() {
+  if (st.nivel === 'serie') return { n: 18, cols: TEMPS.map((t, i) => ({ x0: i * 8, w: t.n, t })) };
+  if (st.nivel === 'temporada') return { n: 8, cols: EPS.slice(st.temp * 8, st.temp * 8 + 8).map((e, i) => ({ x0: i, w: 1, e, i: st.temp * 8 + i })) };
+  return { n: 4, cols: ACTOS.map(([k, t], i) => ({ x0: i, w: 1, acto: k, t })) };
+}
+function pos(u, n) { return (u / n) * 100; }
+function visor() {
+  const { n, cols } = columnas(), filas = [];
+  const crumb = [`<button data-zoom="serie">${ic('tv', 'i')} Primera · prueba</button>`];
+  if (st.nivel !== 'serie') crumb.push(ic('chevron-right'), st.nivel === 'temporada' ? `<span class="cur">${TEMPS[st.temp].id} · ${TEMPS[st.temp].ti}</span>` : `<button data-zoom="temporada">${TEMPS[st.temp].id} · ${TEMPS[st.temp].ti}</button>`);
+  if (st.nivel === 'episodio') crumb.push(ic('chevron-right'), `<span class="cur">${epId(st.ep)} · ${EPS[st.ep].t}</span>`);
+  const pista = { serie: 'Pincha una temporada para verla a todo lo ancho', temporada: 'Pincha un episodio para ver sus actos y escenas', episodio: 'Pincha una escena para editarla · ↑ con las migas' }[st.nivel];
+
+  // Fila de cabecera: temporadas, episodios o actos
+  let cab = '';
+  if (st.nivel === 'serie') cab = cols.map(({ x0, w, t }, i) => `<div class="colh ${t.plan ? 'plan' : ''} ${i === st.temp ? 'cur' : ''}" style="left:${pos(x0, n)}%;width:calc(${pos(w, n)}% - 6px)" data-temp="${i}"><b>${t.id}</b><small>${t.plan ? '¿? ep · prevista' : t.n + ' ep'}</small>${cg(t.carga)}</div>`).join('');
+  if (st.nivel === 'temporada') cab = cols.map(({ x0, e, i }) => `<div class="colh ${i === st.ep ? 'cur' : ''} ${e.c[0] === e.c[1] ? 'mal' : ''}" style="left:${pos(x0, n)}%;width:calc(${pos(1, n)}% - 6px);flex-direction:column;align-items:flex-start;justify-content:center;gap:1px" data-ep="${i}"><small>${epId(i).slice(3)}</small><span class="ti">${e.t || '—'}</span></div>`).join('');
+  if (st.nivel === 'episodio') cab = cols.map(({ x0, t, acto }) => `<div class="colh" style="left:${pos(x0, n)}%;width:calc(${pos(1, n)}% - 6px);cursor:default"><b>${t}</b><small>${ESC.filter(s => s.a === acto).length} esc.</small></div>`).join('');
+  filas.push(['<span class="nm">' + { serie: 'Temporadas', temporada: 'Episodios', episodio: 'Actos' }[st.nivel] + '</span>', `<div class="trk">${cab}</div>`]);
+
+  // Carga
+  if (st.nivel === 'temporada') filas.push(['<span class="nm">Carga</span><small>montaña rusa + / −</small>', curva(EPS.slice(st.temp * 8, st.temp * 8 + 8).map(e => e.c))]);
+  if (st.nivel === 'episodio') filas.push(['<span class="nm">Valor de cada escena</span><small>+ / −</small>', curva(ESC.map(s => s.v))]);
+
+  // Trama global (solo serie)
+  if (st.nivel === 'serie') {
+    let t = `<div class="ln" style="left:0;right:0;background:var(--t1);opacity:.35"></div>`;
+    t += PUNTOS.map(([nm, u, ico, up, key]) => `<div class="beat ${up ? 'up' : ''} ${key ? 'key' : ''}" style="left:${pos(u + .5, n)}%"><div class="bd">${ic(ico)}</div><span class="bl">${nm}</span></div>`).join('');
+    filas.push(['<span class="nm">Trama global</span>', `<div class="trk tall">${t}</div>`]);
+  }
+
+  // Arcos
+  const ks = Object.keys(ARCOS);
+  for (const k of ks) {
+    const a = ARCOS[k], fin = finArco(k), lente = st.arco && st.arco !== k;
+    let tr = '';
+    if (st.nivel === 'serie' || st.nivel === 'temporada') {
+      const off = st.nivel === 'serie' ? 0 : st.temp * 8, N = st.nivel === 'serie' ? 18 : 8;
+      const u = i => (i - off + .5);
+      const i0 = Math.max(a.ini, off), i1 = Math.min(fin, off + N - 1);
+      if (i1 >= i0) {
+        tr += `<div class="ln m-${a.m} ${a.sinCierre || fin >= off + N ? 'fade' : ''}" style="left:${pos(u(i0), N)}%;width:${pos(i1 - i0 + (fin > off + N - 1 ? .5 : 0), N)}%;background:${a.c}"></div>`;
+        PAR.filter(p => p[0] === k && p[1] >= i0 && p[1] <= i1).forEach(p => tr += `<div class="st" style="left:${pos(u(p[1]), N)}%" title="${p[3]}">${parada(p[2], a.c)}</div>` + (st.nivel === 'temporada' ? `<span class="stl" style="left:${pos(u(p[1]), N)}%">${p[3]}</span>` : ''));
+        if (fin > off + N - 1 && st.nivel === 'temporada') tr += `<span class="cont" style="right:-56px">${ic('arrow-right')} T0${st.temp + 2}</span>`;
+      }
+      if (k === 'ven' && st.nivel === 'serie') tr += `<div class="bomb" style="left:${pos(15.5, 18)}%" title="Bomba de tiempo: el cierre de la emisora llega al final de T2">${ic('bomb')}</div>`;
+      if (k === 'her' && st.her !== base.her) { const g0 = Math.min(st.her, base.her), g1 = Math.max(st.her, base.her); if (g1 >= off && g0 <= off + N - 1) tr += `<div class="fantasma" style="left:${pos(u(Math.max(g0, off)), N)}%;width:${pos(Math.min(g1, off + N - 1) - Math.max(g0, off), N)}%"></div>`; }
+      if (ysiOn() && (k === 'her' || k === 'amo')) { const g1 = ARCOS[k].fin; if (g1 > 4) tr += `<div class="fantasma" style="left:${pos(u(4), N)}%;width:${pos(Math.min(g1, off + N - 1) - 4, N)}%"></div>`; }
+      if (k === 'car' && st.nivel === 'temporada' && st.temp === 1) tr += `<div class="olv" style="left:${pos(.0, 8)}%;width:${pos(4, 8)}%" title="Desaparece 4 episodios (G14)"></div>`;
+    } else {
+      // Nivel episodio: escenas del episodio colocadas por acto
+      const enA = ESC.map((s, j) => ({ s, j })).filter(({ s }) => s.arcos.some(x => x[0] === k));
+      const ux = s => { const ai = ACTOS.findIndex(x => x[0] === s.a), del = ESC.filter(z => z.a === s.a), j = del.indexOf(s); return ai + (j + 1) / (del.length + 1); };
+      if (enA.length) {
+        const xs = enA.map(({ s }) => ux(s)); tr += `<div class="ln m-${a.m}" style="left:${pos(Math.min(...xs), 4)}%;width:${pos(Math.max(...xs) - Math.min(...xs), 4)}%;background:${a.c}"></div>`;
+        enA.forEach(({ s }) => { const p = s.arcos.find(x => x[0] === k)[1]; tr += `<div class="st" style="left:${pos(ux(s), 4)}%" data-esc="${s.id}" title="${s.id} · ${s.t}">${parada(p, a.c, s.id === st.esc ? 20 : 16)}</div><span class="stl" style="left:${pos(ux(s), 4)}%">${s.id}</span>`; });
+      } else continue;
+    }
+    filas.push([`<span class="sw" style="background:${a.c}"></span><span style="min-width:0"><span class="nm">${a.t}</span><small>${a.s}</small></span>`, `<div class="trk ${lente ? 'dim' : ''}">${tr}</div>`, k]);
+  }
+
+  // Secretos (serie y temporada)
+  if (st.nivel !== 'episodio') {
+    filas.push(['<span style="font-size:11px;color:var(--ink-3)">Secretos</span>', '', null, 'sepr']);
+    const off = st.nivel === 'serie' ? 0 : st.temp * 8, N = st.nivel === 'serie' ? 18 : 8;
+    SECRETOS.forEach(s => {
+      let tr = s.marcas.filter(([i]) => i >= off && i < off + N).map(([i, ico]) => `<span class="secm" style="left:${pos(i - off + .5, N)}%">${ic(ico)}</span>`).join('');
+      if (s.rev >= off && s.rev < off + N) tr += `<span class="secm rev ${s.mal ? 'mal' : ''}" style="left:${pos(s.rev - off + .5, N)}%" title="Se revela">${ic('eye')}</span>`;
+      else if (s.rev >= off + N) tr += `<span class="cont" style="right:0;color:var(--accent)">${ic('eye')} ${s.revT}</span>`;
+      filas.push([`${ic('eye-off')}<span style="min-width:0"><span class="nm">${s.t}</span><small>${s.s}</small></span>`, `<div class="trk">${tr}</div>`]);
+    });
+  }
+
+  const ticks = `<div class="ticks" style="grid-template-columns:repeat(${n},1fr)">${'<i></i>'.repeat(n)}</div>`;
+  return `<div class="card visor ${st.sube ? 'sube' : ''}"><div class="vtop"><div class="crumb">${crumb.join('')}</div><span class="zoomh">${ic('zoom-in')}${pista}</span></div>
+    <div class="board">${filas.map(([l, t, k, cls]) => `<div class="row ${cls || ''}"><div class="rl ${k ? 'click' : ''} ${k && st.arco && st.arco !== k ? 'dim' : ''}" ${k ? `data-arco="${k}"` : ''}>${l}</div><div style="position:relative">${t || ''}</div></div>`).join('')}</div>
+    <div class="legend" style="padding:0 20px 14px">${st.nivel === 'serie' ? `<span>${ic('sunrise')}Inicio</span><span>${ic('zap')}Detonante</span><span>${ic('split')}Giro</span><span>${ic('mountain')}Clímax</span><span>${ic('flag')}Fin</span><span style="color:var(--warn)">${ic('bomb')}Bomba de tiempo</span><span class="sep"></span>` : ''}
+      <span>${parada('abre', 'var(--ink-3)', 13)}Abre</span><span>${parada('avanza', 'var(--ink-3)', 13)}Avanza</span><span>${parada('gira', 'var(--ink-3)', 13)}Gira</span><span>${parada('cierra', 'var(--ink-3)', 13)}Cierra</span><span class="sep"></span>
+      <span><i class="mk"></i>Canon</span><span><i class="mk" style="opacity:.6;-webkit-mask:repeating-linear-gradient(90deg,#000 0 6px,transparent 6px 9px)"></i>Borrador</span><span><i class="mk" style="height:2px;opacity:.5;-webkit-mask:repeating-linear-gradient(90deg,#000 0 2px,transparent 2px 5px)"></i>Idea</span>
+      ${st.nivel !== 'episodio' ? `<span class="sep"></span><span>${ic('sprout')}Pista</span><span>${ic('ghost')}Pista falsa</span><span style="color:var(--accent)">${ic('eye')}Revelación</span>` : ''}
+      <span class="sep"></span><span style="color:var(--accent)"><i class="mk" style="background:none;border-top:2.5px dashed var(--accent);height:0"></i>Cómo quedaría</span></div></div>`;
+}
+
+/* ---------- Contenido bajo el visor ---------- */
+const crear = (...t) => `<div class="crearbar"><span class="lbl">Crear</span>${t.map(([k, n]) => `<button class="btn" data-nuevo="${k}">${ic('plus')}${n}</button>`).join('')}</div>`;
+function bx(h, ico, ref, txt, cls = '') { return `<div class="bx ${txt ? '' : 'empty'} ${cls}"><h3>${ic(ico)}${h}<span class="ref">${ref}</span></h3>${txt ? `<p>${txt}</p>` : `<p class="hint">Vacío: ${ref.includes('G') ? regla(ref.split(' ')[0])?.[2] || '' : ''}</p>`}</div>`; }
+function contenido() {
+  if (st.nivel === 'serie') return `
+    <div class="vh"><div><div class="eyebrow">Paso 1 · Serie · orden de emisión</div><h1 class="t">Primera · prueba</h1><p class="logline">Un técnico de radio vuelve a su pueblo para cerrar la emisora de su madre y descubre que cada noche capta una voz que lee las noticias del día siguiente.</p></div>
+      <div class="meta"><span class="pill">${ic('list-checks')}8/11 preguntas</span><span class="pill">3 temporadas</span></div></div>
+    ${crear(['temporada', 'Temporada'], ['trama', 'Trama de serie'], ['personaje', 'Arco de personaje'], ['secreto', 'Secreto'], ['punto', 'Punto clave'])}
+    ${visor()}
+    <div class="g3">${bx('Pregunta de oro', 'circle-help', 'G03 · §18', '¿Podrá Telmo avisar de lo que va a pasar sin provocarlo?')}${bx('Final decidido', 'flag', 'G02 · §18', 'Avisa, y la emisora enmudece para siempre.')}${bx('Pregunta filosófica', 'scale', 'G04 · §3', '¿Se puede evitar lo que ya se ha oído?')}</div>`;
+  if (st.nivel === 'temporada') { const t = TEMPS[st.temp]; return `
+    <div class="vh"><div><div class="eyebrow">Paso 3 · Temporada · ${t.id} · en marcha</div><h1 class="t">${t.ti}</h1><p class="logline">¿Cerrará Telmo la emisora que su madre dejó encendida?</p></div><div class="meta"><span class="pill">${cg(t.carga)} carga ${t.carga.join(' → ')}</span><span class="pill">Trama principal: El eco</span></div></div>
+    ${crear(['episodio', 'Episodio'], ['evento', 'Evento a la bandeja'], ['secreto', 'Secreto'], ['trama-t', 'Trama de esta temporada'])}
+    ${visor()}
+    <div class="beats4">${bx('Punto de partida', 'sunrise', 'Plantilla', 'Telmo vuelve a Cabo Sal.')}${bx('Estructura', 'git-commit-horizontal', 'G30 · §17', 'Detonante E01 · punto medio E05 · crisis E07 · clímax E08')}${bx('Punto de llegada', 'flag', 'G34 · §12', 'Telmo mantiene la emisora y pierde a Nando.')}${bx('Cierre / cliffhanger', 'fish-symbol', 'G29 · §12', 'La cinta: la voz era la de su madre.', 'hook')}</div>
+    <div class="tray"><span class="lbl">${ic('inbox')}Bandeja · arrastra a un episodio</span><span class="chip"><span class="dot" style="background:var(--t1)"></span>Subida a la azotea</span><span class="chip"><span class="dot" style="background:var(--t3)"></span>Alguien conoce la frecuencia</span><span class="chip add" data-nuevo="evento">${ic('plus')}Evento</span></div>`; }
+  const e = EPS[st.ep], s = ESC.find(x => x.id === st.esc);
+  return `
+    <div class="vh"><div><div class="eyebrow">Paso 5 · Episodio · ${epId(st.ep)} · <span class="state escaleta">${e.e}</span></div><h1 class="t">${e.t}</h1><p class="logline">Telmo mantiene la emisora en el aire, pero el Alcalde se lo cobra a su manera: alguien cercano paga por él.</p></div><div class="meta"><span class="pill">${cg(e.c)} ${e.c.join(' → ')}</span></div></div>
+    ${crear(['escena', 'Escena'], ['episodio', 'Episodio'])}
+    ${visor()}
+    <div class="beats4">${bx('Deseo', 'target', 'G37 · §12', 'Ganar la segunda emisión sin que nadie lo sepa.')}${bx('Fuerza antagónica', 'swords', 'G37 · §12', 'El Alcalde')}${bx('Conflicto', 'zap', 'G37 · §12', 'Ganar le obliga a exponer a Nando.')}${bx('Gancho final', 'fish-symbol', 'G40 · §11', '', 'hook')}</div>`;
+}
+
+/* ---------- Menú izquierdo y barra ---------- */
+function side() {
+  const nav = (on, ico, t, attrs, ct = '') => `<button class="nav ${on ? 'on' : ''}" ${attrs}>${ico}<span>${t}</span>${ct}</button>`;
+  return `<div class="brand"><b>Atelier</b>· pizarra de serie</div>
+    <button class="switch"><span class="av">P</span><span class="nm">Primera · prueba<small>2 temporadas · 16 episodios</small></span>${ic('chevrons-up-down')}</button>
+    <div class="sh">Estructura</div>
+    ${nav(st.nivel === 'serie' && !st.arco, ic('tv'), 'Serie', 'data-zoom="serie"')}
+    ${TEMPS.map((t, i) => nav(st.nivel !== 'serie' && st.temp === i && !st.arco, ic('layers'), `${t.id} · ${t.ti}`, t.plan ? '' : `data-temp="${i}"`, `<span class="ct">${t.plan ? '¿?' : t.n}</span>`)).join('')}
+    <div class="sh">Tramas <button data-nuevo="trama">${ic('plus')}</button></div>
+    ${Object.entries(ARCOS).map(([k, a]) => nav(st.arco === k, `<span class="dot" style="background:${a.c}"></span>`, (a.de ? '↳ ' : '') + a.t, `data-arco="${k}"`, `<span class="lv">${a.abc === 'A' && a.tipo === 'trama' ? 'A' : a.tipo === 'personaje' ? 'per' : a.tipo === 'relación' ? 'rel' : a.abc}</span>`)).join('')}
+    <div class="sh">Secretos <button data-nuevo="secreto">${ic('plus')}</button></div>
+    ${SECRETOS.map(s => nav(false, ic('eye-off'), s.t, '', `<span class="lv">${s.s.split(' ')[1]}</span>`)).join('')}
+    <div class="sh">Wiki de Obsidian</div>
+    ${nav(false, ic('users'), 'Personajes', '', '<span class="ct">14</span>')}${nav(false, ic('map-pin'), 'Lugares', '', '<span class="ct">9</span>')}${nav(st.pest === 'guia', ic('book-open'), 'Guía de escritura', 'data-pest="guia"', '<span class="ct">49</span>')}
+    <div class="sync">${ic('cloud-check')}<span>Sincronizado<code>solo abierta en PC-ESTUDIO</code></span></div>`;
+}
+function barraTop() {
+  const c = [`<button data-zoom="serie">Primera · prueba</button>`];
+  if (st.nivel !== 'serie') c.push(ic('chevron-right'), `<button data-zoom="temporada">${TEMPS[st.temp].id}</button>`);
+  if (st.nivel === 'episodio') c.push(ic('chevron-right'), `<span class="cur">${epId(st.ep)} ${EPS[st.ep].t}</span>`);
+  if (st.arco) c.push(ic('chevron-right'), `<span class="cur">${ARCOS[st.arco].t}</span>`);
+  $('crumbTop').innerHTML = c.join('');
+  const segs = [['serie', '1', 'Serie'], ['temporada', '2', 'Temporada'], ['episodio', '3', 'Episodio']];
+  $('seg').innerHTML = segs.map(([k, n, t]) => `<button class="${st.nivel === k ? 'on' : ''}" data-zoom="${k}"><span class="n">${n}</span>${t}</button>`).join('');
+}
+
+/* ---------- Inspector: Editar · Si lo dejas así · Guía ---------- */
+function piezaActual() {
+  if (st.arco) { const a = ARCOS[st.arco]; return { k: a.tipo === 'trama' ? 'Trama' : 'Arco de ' + a.tipo, ico: 'git-branch', t: a.t, piezas: a.tipo === 'trama' ? (a.abc === 'A' ? ['arco de trama'] : ['arco de trama', 'subtrama']) : ['arco de ' + a.tipo], ruta: (a.m === 'idea' ? 'appDatos/prueba/arcos/' : 'MiSerie/01_Wiki/01_Narrativa/Arcos/') + a.t + '.md', m: a.m }; }
+  if (st.nivel === 'serie') return { k: 'Serie', ico: 'tv', t: 'Primera · prueba', piezas: ['serie'], ruta: 'appDatos/prueba/serie.md', m: 'borrador' };
+  if (st.nivel === 'temporada') return { k: 'Temporada', ico: 'layers', t: TEMPS[st.temp].id + ' · ' + TEMPS[st.temp].ti, piezas: ['temporada'], ruta: 'MiSerie/01_Wiki/01_Narrativa/Temporadas/' + TEMPS[st.temp].id + '.md', m: 'canon' };
+  const s = ESC.find(x => x.id === st.esc); return { k: 'Escena · ' + epId(st.ep) + ' · ' + s.id, ico: 'clapperboard', t: s.t, piezas: ['evento'], ruta: 'appDatos/prueba/eventos/' + s.id + '.md', m: 'propuesta' };
+}
+function falla(id) {
+  const s = ESC.find(x => x.id === st.esc);
+  return { G05: true, G13: st.her >= 8 && st.herNivel === 't1', G14: true, G20: !!st.arco && ARCOS[st.arco].abc !== 'A', G38: EPS.some(e => e.c[0] === e.c[1]), G40: st.nivel === 'episodio', G42: !!s && s.v[0] === s.v[1], G46: true, G47: true }[id] || false;
+}
+function efectos() {
+  const o = [];
+  if (st.arco === 'her') {
+    if (st.her !== base.her) {
+      const a = Math.min(base.her, st.her) + 1, b = Math.max(base.her, st.her), l = []; for (let i = a; i <= b; i++) l.push(epId(i));
+      o.push(['', 'git-compare', (st.her > base.her ? 'El arco pasa también por ' : 'Deja de pasar por ') + l.join(', '), `${l.length} episodios cambian en el visor y en la rejilla`]);
+      o.push(['', 'milestone', 'El beat «Resolución» se mueve a ' + epId(st.her), 'Se reescribe en la ficha del arco']);
+    }
+    if (st.her >= 8 && st.herNivel === 't1') o.push(['mal', 'triangle-alert', `<b>G13</b> ${regla('G13')[2]}`, 'Termina en T02 pero su nivel es T01. Cámbialo a «Toda la serie» o ciérralo en T01.']);
+    if (st.her >= 8) o.push(['', 'user', '[[Nando]] sigue enfrentado a Telmo al empezar T02', 'Afecta a su ficha: estado al empezar T02']);
+    o.push(['sug', 'lightbulb', `<b>G20</b> ${regla('G20')[2]}`, 'Sin bomba de tiempo.']);
+  } else if (st.arco) o.push(['', 'info', 'Elige «Amistad rota» y cambia «Termina en» para ver consecuencias.', '']);
+  else if (st.nivel === 'serie') { o.push(['sug', 'lightbulb', `<b>G05</b> ${regla('G05')[2]}`, 'Falta el catalizador de la logline.']); o.push(['mal', 'triangle-alert', `<b>G46</b> «El solar nunca fue del Ayuntamiento» se revela sin pistas`, regla('G46')[2]]); }
+  else if (st.nivel === 'temporada') { EPS.slice(st.temp * 8, st.temp * 8 + 8).forEach((e, j) => { if (e.c[0] === e.c[1]) o.push(['mal', 'triangle-alert', `<b>G38</b> ${epId(st.temp * 8 + j)} empieza y acaba en ${e.c[0]}`, regla('G38')[2]]); }); o.push(['mal', 'triangle-alert', '<b>G14</b> «La cinta oculta» desaparece de T02E01 a T02E04', regla('G14')[2]]); }
+  else { const s = ESC.find(x => x.id === st.esc); if (s.v[0] === s.v[1]) o.push(['mal', 'triangle-alert', `<b>G42</b> ${s.id} empieza y acaba en ${s.v[0]}`, regla('G42')[2]]); o.push(['', 'git-compare', `${s.id} toca ${s.arcos.map(([k, p]) => ARCOS[k].t + ' (' + p + ')').join(', ')}`, 'Si la mueves de episodio, cambian esos arcos en el visor']); o.push(['sug', 'lightbulb', `<b>G40</b> ${regla('G40')[2]}`, 'El episodio no tiene gancho.']); }
+  if (ysiOn()) { o.unshift(['mal', 'triangle-alert', `<b>G24</b> «Amistad rota» se cierra por muerte, no por cambio`, regla('G24')[2]]); o.unshift(['', 'flask-conical', '«Voces cruzadas» pierde a su segundo personaje en E05', 'Prueba «Nando se va en E05»']); }
+  return o;
+}
+function campo(lbl, ref, v, attrs = '', sel = null, ancho = false) {
+  const reglas = ref.split(' ').filter(x => /^G\d+$/.test(x));
+  const pista = reglas.length ? `<div class="pista warnbox info">${ic('book-open')}<div>${reglas.map(id => `<b style="font:500 10.5px var(--mono);color:var(--accent)">${id}</b> ${regla(id)[2]} <span style="color:var(--ink-3)">· ${fuente(regla(id)[3])}</span>`).join('<br>')}</div></div>` : '';
+  const ctl = sel ? `<select class="v" ${attrs}>${sel}</select>` : `<input class="v ${v ? '' : 'ph'}" value="${v}" placeholder="${v ? '' : 'Vacío'}" ${attrs}>`;
+  return `<div class="f" ${ancho ? 'style="grid-column:1/-1"' : ''}><label>${lbl}<span class="ref">${ref}</span></label>${ctl}${pista}</div>`;
+}
+function editar() {
+  if (st.arco === 'her') { const o = (v, t) => `<option value="${v}" ${st.her === v ? 'selected' : ''}>${t}</option>`; return `
+    <div class="f2">${campo('Nivel', 'G13', '', 'data-c="herNivel"', `<option value="t1" ${st.herNivel === 't1' ? 'selected' : ''}>T01</option><option value="serie" ${st.herNivel === 'serie' ? 'selected' : ''}>Toda la serie</option>`)}${campo('Tipo', '', 'B')}</div>
+    <div class="f2">${campo('Empieza en', 'G15', 'T01E03')}${campo('Termina en', 'G13 G15', '', 'data-c="her"', o(5, 'T01E06') + o(7, 'T01E08') + o(11, 'T02E04'))}</div>
+    ${campo('Protagonistas', 'G16', '[[Telmo]], [[Nando]]')}${campo('Qué quiere y por qué', 'G07 §10', 'Nando quiere que Telmo deje de cargar solo')}
+    <div class="f2">${campo('Qué gana', 'G08', 'Un amigo que pide ayuda')}${campo('Qué pierde', 'G08 G09', 'A su amigo')}</div>
+    ${campo('Bomba de tiempo', 'G10 G20', '')}${campo('Pegamento con la principal', 'G19 §13', 'Por tema: la herencia callada')}`; }
+  if (st.arco) return campo('Qué quiere y por qué', 'G07 §10', '') + campo('Qué gana / qué pierde', 'G08', '') + campo('Bomba de tiempo', 'G10', '');
+  if (st.nivel === 'serie') return campo('Protagonista', 'G05 §4', 'Telmo') + campo('Objetivo', 'G05', 'Cerrar la emisora de su madre') + campo('Catalizador', 'G05', '') + campo('Dinámica de la historia', 'G06 §25', 'Cada plazo cuesta más');
+  if (st.nivel === 'temporada') return campo('Logline', 'G29', '¿Cerrará Telmo la emisora que su madre dejó encendida?') + campo('Trama principal', 'G35', '', '', '<option>El eco</option>') + `<div class="f"><label>Carga de cada episodio · pulsa para cambiar<span class="ref">G38</span></label><div class="tg">${EPS.slice(st.temp * 8, st.temp * 8 + 8).map((e, j) => `<button data-carga="${st.temp * 8 + j}" class="${e.c[0] === e.c[1] ? '' : 'on'}" style="${e.c[0] === e.c[1] ? 'color:var(--warn)' : ''}">${j + 1}${e.c.join('')}</button>`).join('')}</div></div>`;
+  const s = ESC.find(x => x.id === st.esc);
+  return campo('Qué pasa', '', s.t) + `<div class="f"><label>Valor: empieza → acaba · pulsa<span class="ref">G42</span></label><div class="tg"><button data-val="0" class="on">${s.v[0]}</button><button data-val="1" class="on">${s.v[1]}</button></div></div>` + campo('Qué se gana / qué se pierde', 'G41 §10', '') + `<div class="f"><label>Test de relleno<span class="ref">G43 §25</span></label><div class="chk"><span class="bx2 on">${ic('check')}</span><span>Hace avanzar a un protagonista<small>${s.arcos.map(([k]) => ARCOS[k].t).join(', ')}</small></span></div><div class="chk"><span class="bx2"></span><span>Da información o desarrolla a alguien</span></div></div>`;
+}
+function guia(p) {
+  const rs = REGLAS.filter(r => p.piezas.includes(r[1]));
+  return `<div class="gsrc">${ic('book-open')}Guía de Atelier · Chuleta de escritura · Plantillas <span style="margin-left:auto">magia: desactivada</span></div>` +
+    rs.map(r => { const mal = falla(r[0]), comp = !!r[4]; return `<div class="maxim"><span class="ref">${r[0]}</span><div><p>${r[2]}</p><small>${fuente(r[3])} · ${mal ? 'no se cumple' : comp ? 'se cumple' : 'la juzgas tú'}</small></div><span class="st2" style="color:${mal ? 'var(--warn)' : comp ? 'var(--ok)' : 'var(--ink-3)'}">${ic(mal ? 'circle-x' : comp ? 'circle-check' : 'circle-dashed')}</span></div>`; }).join('');
+}
+function insp() {
+  const p = piezaActual(), ef = efectos();
+  const tabs = [['editar', 'Editar', 0], ['efectos', 'Si lo dejas así', ef.length], ['guia', 'Guía', REGLAS.filter(r => p.piezas.includes(r[1]) && falla(r[0])).length]];
+  const est = ['idea', 'propuesta', 'aparcado', 'borrador', 'canon', 'descartado'];
+  let body = '';
+  if (st.pest === 'editar') body = `<div class="f"><label>Estado</label><div class="tg sm">${est.map(e => `<button class="${e === p.m ? 'on' : ''}">${e === 'canon' ? ic('lock') : ''}${e}</button>`).join('')}</div></div>` + editar();
+  if (st.pest === 'efectos') body = ef.length ? `<div class="cklist">${ef.map(([c, i, t, s]) => `<div class="it ${c}">${ic(i)}<div><p>${t}</p>${s ? `<small>${s}</small>` : ''}${c === 'mal' || c === 'sug' ? `<div style="display:flex;gap:6px;margin-top:6px"><button class="btn ghost" style="padding:2px 8px;font-size:11.5px">Ir al campo</button><button class="btn ghost" style="padding:2px 8px;font-size:11.5px">Seguir así (a propósito)</button></div>` : ''}</div></div>`).join('')}</div>` : '<p class="vacio-v">Nada que señalar.</p>';
+  if (st.pest === 'guia') body = guia(p);
+  $('insp').innerHTML = `<div class="ih"><div class="k">${ic(p.ico)}${p.k}</div><h3>${p.t}</h3><div class="tabs">${tabs.map(([k, t, n]) => `<button class="${st.pest === k ? 'on' : ''}" data-pest="${k}">${t}${n ? `<span class="n" style="${k === 'efectos' ? 'background:var(--ink-3)' : ''}">${n}</span>` : ''}</button>`).join('')}</div></div>
+    <div class="ib-body">${body}</div><div class="ifoot">${ic('cloud-check')}Guardado hace 2 s<span class="sp wkpath">${p.ruta}</span></div>`;
+}
+
+/* ---------- Ventana «Nueva pieza» ---------- */
+const TIPOS = { idea: ['Idea suelta', [], 'ideas/'], trama: ['Trama de serie', ['arco de trama'], 'Arcos/'], 'trama-t': ['Trama de temporada', ['arco de trama', 'subtrama'], 'Arcos/'], personaje: ['Arco de personaje', ['arco de personaje'], 'Arcos/'], relacion: ['Arco de relación', ['arco de relación'], 'Arcos/'], temporada: ['Temporada', ['temporada'], 'Temporadas/'], episodio: ['Episodio', ['episodio'], 'Episodios/'], escena: ['Escena', ['evento'], 'eventos/'], evento: ['Evento', ['evento'], 'eventos/'], secreto: ['Secreto', ['secreto'], 'Secretos/'], punto: ['Punto clave', ['serie'], 'serie.md'] };
+function vent() {
+  const n = st.nuevo, [nom, piezas, dir] = TIPOS[n.tipo], rs = REGLAS.filter(r => piezas.includes(r[1]));
+  const ruta = n.estado === 'idea' ? `appDatos/prueba/${dir.toLowerCase()}${n.titulo || 'sin título'}.md · mesa de borradores` : `MiSerie/01_Wiki/01_Narrativa/${dir}${n.titulo || 'sin título'}.md · wiki, con su plantilla y entrada en Log.md`;
+  $('vent').innerHTML = `<div class="izq"><div class="eyebrow">${ic('plus')}Nueva pieza</div><h2>${nom}</h2>
+    <div class="tg sm" style="margin-bottom:14px">${Object.entries(TIPOS).map(([k, [t]]) => `<button class="${k === n.tipo ? 'on' : ''}" data-tipo="${k}">${t}</button>`).join('')}</div>
+    <div class="f"><label>Título o idea en una frase</label><input class="v" id="ntit" value="${n.titulo}" placeholder="Escribe sin miedo: nada es obligatorio"></div>
+    <div class="f" style="margin-top:12px"><label>Empieza como</label><div class="opc"><button class="${n.estado === 'idea' ? 'on' : ''}" data-est="idea"><b>Idea</b><small>En la mesa de borradores. Para probar.</small></button><button class="${n.estado === 'borrador' ? 'on' : ''}" data-est="borrador"><b>Borrador</b><small>En la wiki, con su plantilla.</small></button></div></div>
+    <div class="ruta">Se guardará en: ${ruta}</div>
+    <div style="display:flex;justify-content:flex-end;gap:8px"><button class="btn" data-cerrar="1">Cancelar</button><button class="btn pri" data-crear="1">${ic('plus')}Crear</button></div></div>
+    <div class="der"><div class="eyebrow" style="margin-bottom:4px">${ic('book-open')}Lo que te pedirán tus guías</div>${rs.length ? rs.map(r => `<div class="maxim"><span class="ref">${r[0]}</span><div><p style="font-size:14px">${r[2]}</p><small>${fuente(r[3])}</small></div></div>`).join('') : '<p class="vacio-v">Una idea suelta no tiene reglas: escribe libre.</p>'}</div>`;
+  lucide.createIcons();
+}
+function abrir(tipo) { st.nuevo = { tipo, titulo: '', estado: 'idea' }; vent(); $('velo').classList.add('on'); setTimeout(() => $('ntit')?.focus(), 30); }
+function crearYa() {
+  const n = st.nuevo, t = ($('ntit').value || 'Sin título').trim();
+  if (['trama', 'trama-t', 'personaje', 'relacion'].includes(n.tipo)) { const k = 'n' + Date.now(); ARCOS[k] = { t, s: TIPOS[n.tipo][0].toLowerCase() + ' · ' + n.estado, abc: n.tipo === 'trama' ? 'A' : 'B', tipo: n.tipo === 'personaje' ? 'personaje' : n.tipo === 'relacion' ? 'relación' : 'trama', m: n.estado, c: 'var(--accent)', ini: st.nivel === 'serie' ? 8 : st.temp * 8, fin: st.nivel === 'serie' ? 8 : st.temp * 8 }; st.arco = k; }
+  if (n.tipo === 'escena') { const id = 'S' + (ESC.length + 1); ESC.push({ id, a: 'desarrollo', t, v: ['+', '−'], arcos: [] }); st.nivel = 'episodio'; st.esc = id; }
+  $('velo').classList.remove('on'); st.pest = 'efectos';
+  const to = $('toast'); to.innerHTML = `${ic('circle-check')}<span>«${t}» creada como <b>${n.estado}</b> · ${n.estado === 'idea' ? 'mesa de borradores' : 'wiki'}</span>`; to.classList.add('on'); setTimeout(() => to.classList.remove('on'), 2600);
+  pintar();
+}
+
+/* ---------- Pintar y eventos ---------- */
+const NOTAS = { serie: 'Visor a nivel serie: pincha T01 o T02 para que ocupe todo el ancho. Clic en un arco a la izquierda = lente (atenúa el resto) y lo edita a la derecha.', temporada: 'Visor a nivel temporada: pincha un episodio para bajar a sus actos y escenas. Elige «Amistad rota» y cambia «Termina en» a T02E04.', episodio: 'Visor a nivel episodio: escenas por actos sobre cada arco. Pincha una parada para editar esa escena. Sube con las migas.' };
+function pintar() {
+  document.body.classList.toggle('ysi-on', st.ysi); $('ysiVer').textContent = st.ysiVer ? 'Ver ahora' : 'Ver cómo quedaría';
+  $('side').innerHTML = side(); barraTop(); $('view').innerHTML = contenido(); insp(); $('nota').textContent = 'Boceto H — ' + NOTAS[st.nivel];
+  lucide.createIcons(); st.sube = false;
+}
+const ORDEN = ['serie', 'temporada', 'episodio'];
+function ir(nivel) { st.sube = ORDEN.indexOf(nivel) < ORDEN.indexOf(st.nivel); st.nivel = nivel; st.arco = null; st.pest = 'efectos'; }
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-zoom],[data-temp],[data-ep],[data-esc],[data-arco],[data-pest],[data-nuevo],[data-tipo],[data-est],[data-crear],[data-cerrar],[data-carga],[data-val],#ysi,#ysiVer,#tema');
+  if (!t) { if (e.target.id === 'velo') $('velo').classList.remove('on'); return; }
+  const d = t.dataset;
+  if (d.nuevo) return abrir(d.nuevo);
+  if (d.tipo) { st.nuevo.titulo = $('ntit').value; st.nuevo.tipo = d.tipo; return vent(); }
+  if (d.est) { st.nuevo.titulo = $('ntit').value; st.nuevo.estado = d.est; return vent(); }
+  if (d.crear) return crearYa();
+  if (d.cerrar) return $('velo').classList.remove('on');
+  if (d.zoom) ir(d.zoom);
+  else if (d.temp) { ir('temporada'); st.temp = +d.temp; }
+  else if (d.ep) { st.ep = +d.ep; ir('episodio'); if (st.ep !== 4) toast0(); }
+  else if (d.esc) { st.esc = d.esc; st.arco = null; st.pest = 'editar'; }
+  else if (d.arco) { st.arco = st.arco === d.arco ? null : d.arco; st.pest = st.arco ? 'editar' : 'efectos'; }
+  else if (d.pest) st.pest = d.pest;
+  else if (d.carga) { const ep = EPS[+d.carga]; ep.c[1] = ep.c[1] === '+' ? '−' : '+'; st.pest = 'efectos'; }
+  else if (d.val) { const s = ESC.find(x => x.id === st.esc); s.v[+d.val] = s.v[+d.val] === '+' ? '−' : '+'; }
+  else if (t.id === 'ysi') { st.ysi = !st.ysi; st.ysiVer = true; }
+  else if (t.id === 'ysiVer') st.ysiVer = !st.ysiVer;
+  else if (t.id === 'tema') { const r = document.documentElement; r.dataset.theme = r.dataset.theme === 'dark' ? 'light' : 'dark'; }
+  pintar();
+});
+function toast0() { const to = $('toast'); to.innerHTML = `${ic('info')}<span>En el boceto solo E05 tiene escenas de ejemplo; se muestran las de E05.</span>`; to.classList.add('on'); setTimeout(() => to.classList.remove('on'), 2600); st.ep = 4; }
+document.addEventListener('change', e => { const c = e.target.dataset.c; if (!c) return; if (c === 'her') st.her = +e.target.value; if (c === 'herNivel') st.herNivel = e.target.value; st.pest = 'efectos'; pintar(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') $('velo').classList.remove('on'); if (e.key === 'Enter' && $('velo').classList.contains('on')) crearYa(); if (e.ctrlKey && e.code === 'Space') { e.preventDefault(); abrir('idea'); } });
+pintar();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+/* Madurez en toda la app (spec 4.1, 5.7, T7.1). Canon = línea sólida y punto
+   verde; borrador = línea discontinua translúcida y tarjeta con borde
+   discontinuo; idea = línea de puntos fina (las tres, en componentes.css, como
+   en la maqueta). Descartado = tachado y gris, siempre visible. */
+.ln.m-descartado{background:var(--line-2)!important;height:2px;margin-top:-1px;opacity:.9;-webkit-mask:none;mask:none}
+.ev.m-descartado{border-style:dashed;background:transparent;box-shadow:none;color:var(--ink-3)}
+.ev.m-descartado .txt{text-decoration:line-through;text-decoration-color:var(--ink-3)}
+.descartado .nm{text-decoration:line-through;text-decoration-color:var(--ink-3);color:var(--ink-3);font-weight:400}
+.descartado .sw,.descartado .bar{background:var(--line-2)!important}
+.chip.m-descartado{color:var(--ink-3);text-decoration:line-through;box-shadow:none;background:transparent}
+.chip.m-borrador{border-style:dashed}
+.chip.m-idea{border-style:dotted}
+/* Aparcado (spec 001, RF-15): a un lado, atenuado; sigue a la vista y se puede elegir */
+/* Sin opacidad: bajaría el texto de 4,5:1 (RF-34). Texto en --ink-3 y colores apagados */
+.aparcado,.aparcado *{color:var(--ink-3)!important}
+.aparcado{filter:saturate(.25)}
+.aparcado:hover,.aparcado.on{filter:none}
+/* Seleccionado, sobre el fondo --sel: --ink-3 no llega a 4,5:1 */
+.aparcado.on,.aparcado.on *{color:var(--ink-2)!important}

@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boceto G · Atelier v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fondo: #0f1012; --panel: #16171a; --panel2: #1d1f23; --panel3: #25272c; --borde: #2a2c31;
+    --texto: #e9e9eb; --suave: #8b8e95; --tenue: #5d6067; --acento: #d0743c;
+    --mas: #d9b25f; --menos: #7f9bb8; --aviso: #e07a5f; --suger: #d9b25f; --bien: #5fb38a;
+    --serif: 'Instrument Serif', Georgia, serif; --sans: 'Geist', system-ui, sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fondo); color: var(--texto); font: 13.5px/1.45 var(--sans); height: 100vh; display: grid; grid-template-rows: 46px auto 1fr; overflow: hidden; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+
+  /* Barra superior */
+  .barra { display: flex; align-items: center; gap: 14px; padding: 0 16px; border-bottom: 1px solid var(--borde); background: var(--panel); }
+  .marca { font: italic 22px var(--serif); }
+  .marca span { color: var(--suave); font: 12px var(--sans); margin-left: 8px; }
+  .pasos { display: flex; gap: 2px; margin-left: 10px; }
+  .pasos button { background: none; border: 0; padding: 6px 12px; border-radius: 6px; color: var(--suave); display: flex; gap: 6px; align-items: center; }
+  .pasos button b { font: 11px var(--mono); color: var(--tenue); }
+  .pasos button.on { background: var(--panel3); color: var(--texto); }
+  .pasos button.on b { color: var(--acento); }
+  .buscar { margin-left: auto; background: var(--panel2); border: 1px solid var(--borde); border-radius: 6px; padding: 5px 10px; color: var(--tenue); min-width: 220px; }
+  .ysi { background: var(--panel2); border: 1px solid var(--borde); border-radius: 6px; padding: 5px 10px; }
+  .ysi.on { background: #2b1d14; border-color: var(--acento); color: #f3c3a2; }
+  .idea { background: var(--acento); border: 0; color: #1c0f06; font-weight: 600; border-radius: 6px; padding: 6px 12px; }
+
+  /* Mapa de la serie, siempre visible */
+  .mapa { border-bottom: 1px solid var(--borde); background: var(--panel); padding: 6px 16px 8px; }
+  .mapa .cab { display: flex; gap: 12px; align-items: baseline; font-size: 11px; color: var(--suave); margin-bottom: 4px; }
+  .mapa .cab b { font-weight: 500; color: var(--texto); }
+  .mapa .cab .ley { margin-left: auto; }
+  .mapa svg { width: 100%; display: block; }
+  .mapa .temp-btn { cursor: pointer; }
+
+  /* Crear en cada nivel */
+  .crear { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin: 0 0 14px; }
+  .crear span { font-size: 11px; color: var(--tenue); text-transform: uppercase; letter-spacing: .8px; margin-right: 4px; }
+  .crear button { background: var(--panel2); border: 1px dashed #3d3f45; border-radius: 6px; padding: 4px 10px; font-size: 12.5px; color: var(--texto); }
+  .crear button:hover { border-color: var(--acento); color: #f3c3a2; }
+
+  /* La guía junto al campo */
+  .pista-guia { display: none; margin-top: 4px; font-size: 11.5px; color: #e9d3a6; background: #241f14; border: 1px solid #4a4020; border-radius: 5px; padding: 5px 8px; }
+  .pista-guia b { font-family: var(--mono); font-weight: 500; color: var(--suger); }
+  .pista-guia a { color: var(--acento); margin-left: 6px; cursor: pointer; }
+  .campo:focus-within .pista-guia { display: block; }
+
+  /* Ventana «Nueva pieza» */
+  .velo { position: fixed; inset: 0; background: #000a; display: none; align-items: center; justify-content: center; z-index: 20; }
+  .velo.on { display: flex; }
+  .ventana { width: min(860px, 94vw); background: var(--panel); border: 1px solid #3a3c42; border-radius: 12px; box-shadow: 0 20px 60px #000c; display: grid; grid-template-columns: 1fr 340px; overflow: hidden; }
+  .ventana .izq { padding: 18px; }
+  .ventana .der { background: var(--panel2); border-left: 1px solid var(--borde); padding: 16px; max-height: 70vh; overflow: auto; }
+  .ventana h2 { margin: 0 0 12px; font: 26px var(--serif); font-weight: 400; }
+  .tipos { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+  .tipos button { background: var(--panel2); border: 1px solid var(--borde); border-radius: 99px; padding: 3px 10px; font-size: 12px; color: var(--suave); }
+  .tipos button.on { background: #2b1d14; border-color: var(--acento); color: #f3c3a2; }
+  .ventana .campo { margin-bottom: 10px; }
+  .radio { display: flex; gap: 8px; }
+  .radio label { flex: 1; border: 1px solid var(--borde); border-radius: 8px; padding: 8px; font-size: 12.5px; cursor: pointer; }
+  .radio label.on { border-color: var(--acento); background: #2b1d14; }
+  .radio small { display: block; color: var(--suave); }
+  .ruta { font: 11.5px var(--mono); color: var(--suave); background: var(--panel2); border-radius: 5px; padding: 6px 8px; margin: 8px 0 14px; }
+  .botones { display: flex; justify-content: flex-end; gap: 8px; }
+  .botones button { background: var(--panel3); border: 1px solid var(--borde); border-radius: 6px; padding: 7px 14px; }
+  .botones button.prim { background: var(--acento); border-color: var(--acento); color: #1c0f06; font-weight: 600; }
+  .regla-n { font-size: 12.5px; padding: 6px 0; border-bottom: 1px solid var(--borde); }
+  .regla-n b { font: 11px var(--mono); color: var(--suger); margin-right: 4px; }
+  .regla-n small { display: block; color: var(--tenue); font-size: 11px; }
+  .aviso-crear { font-size: 12px; color: #f3a58f; margin-top: 4px; }
+  .toast { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); background: #1f3a2c; border: 1px solid #2f5d45; color: #cdeedd; padding: 8px 14px; border-radius: 8px; font-size: 13px; display: none; z-index: 30; }
+  .toast.on { display: block; }
+  .guias-activas { font-size: 12px; color: var(--suave); background: var(--panel2); border-radius: 6px; padding: 8px 10px; margin-bottom: 10px; }
+  .guias-activas a { color: var(--acento); cursor: pointer; }
+  .grupo-reglas { font-size: 11px; color: var(--suave); text-transform: uppercase; letter-spacing: .8px; margin: 12px 0 2px; }
+  .ysi-barra { display: none; align-items: center; gap: 10px; padding: 6px 16px; background: #22170f; border-bottom: 1px solid #5a3218; font-size: 12.5px; color: #f3c3a2; }
+  body.ysi-on .ysi-barra { display: flex; }
+  .ysi-barra .chip { background: #3a2414; border: 1px solid #6b3a1c; border-radius: 99px; padding: 2px 10px; }
+  .ysi-barra .der { margin-left: auto; display: flex; gap: 6px; }
+  .ysi-barra .der button { background: var(--panel2); border: 1px solid var(--borde); border-radius: 5px; padding: 3px 9px; font-size: 12px; }
+  .ysi-barra .der button.prim { background: var(--acento); border-color: var(--acento); color: #1c0f06; font-weight: 600; }
+
+  /* Zona de trabajo */
+  .trabajo { display: grid; grid-template-columns: 1fr 360px; min-height: 0; }
+  .centro { overflow: auto; padding: 18px 22px 60px; }
+  .eti { font-size: 11px; letter-spacing: .8px; text-transform: uppercase; color: var(--suave); }
+  h1.tit { font: 34px/1.1 var(--serif); margin: 2px 0 4px; font-weight: 400; }
+  .lema { font: italic 17px var(--serif); color: var(--suave); margin: 0 0 16px; max-width: 70ch; }
+  .tarjetas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+  .tarj { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; padding: 12px; cursor: pointer; }
+  .tarj:hover { border-color: #3a3c42; }
+  .tarj.sel { border-color: var(--acento); }
+  .tarj .ref { float: right; font: 11px var(--mono); color: var(--tenue); }
+  .tarj p { margin: 6px 0 0; font: 17px/1.35 var(--serif); }
+  .tarj.vacia { border-style: dashed; }
+  .tarj.vacia p { color: var(--tenue); font-style: italic; }
+  .pill { display: inline-flex; gap: 6px; align-items: center; background: var(--panel2); border: 1px solid var(--borde); border-radius: 99px; padding: 3px 10px; font-size: 12px; margin-right: 6px; }
+  .bloque { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+  .bloque > .eti { margin-bottom: 8px; display: flex; justify-content: space-between; }
+  svg text { font-family: var(--sans); }
+
+  /* Lista + detalle (Tramas) */
+  .taller { display: grid; grid-template-columns: 260px 1fr; gap: 14px; }
+  .lista { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; padding: 8px; align-self: start; }
+  .lista .grupo { font-size: 11px; color: var(--suave); text-transform: uppercase; letter-spacing: .8px; padding: 8px 8px 4px; display: flex; justify-content: space-between; }
+  .fila { display: flex; gap: 8px; align-items: center; padding: 7px 8px; border-radius: 6px; cursor: pointer; }
+  .fila:hover { background: var(--panel2); }
+  .fila.sel { background: var(--panel3); }
+  .fila .barra-c { width: 3px; align-self: stretch; border-radius: 2px; }
+  .fila .t { flex: 1; } .fila .t small { display: block; color: var(--suave); font-size: 11.5px; }
+  .fila.sang { padding-left: 22px; }
+  .fila.desc .t { text-decoration: line-through; color: var(--tenue); }
+  .abc { font: 11px var(--mono); border: 1px solid var(--borde); border-radius: 4px; padding: 0 5px; color: var(--suave); }
+  .madurez { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .m-canon { background: var(--bien); } .m-borrador { border: 1.5px dashed var(--suave); } .m-idea { border: 1.5px dotted var(--tenue); } .m-propuesta { background: #a07ad6; }
+  .tri { color: var(--aviso); font-size: 11px; }
+  .beats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .beat { background: var(--panel2); border: 1px solid var(--borde); border-radius: 8px; padding: 8px; min-height: 92px; }
+  .beat .eti { font-size: 10px; } .beat .donde { font: 11px var(--mono); color: var(--acento); } .beat p { margin: 4px 0 0; font-size: 12.5px; }
+  .beat.vacia { border-style: dashed; } .beat.vacia p { color: var(--tenue); font-style: italic; }
+  .campos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+  .campo label { display: block; font-size: 11.5px; color: var(--suave); margin-bottom: 3px; }
+  .campo label i { color: var(--tenue); font-style: normal; font-family: var(--mono); font-size: 10.5px; margin-left: 4px; }
+  .campo input, .campo select, .campo textarea { width: 100%; background: var(--panel2); color: var(--texto); border: 1px solid var(--borde); border-radius: 6px; padding: 7px 9px; font: inherit; }
+  .campo textarea { min-height: 54px; resize: vertical; }
+  .campo.cambiado select, .campo.cambiado input { border-color: var(--acento); box-shadow: 0 0 0 1px var(--acento); }
+  .campo.vacio input { border-style: dashed; }
+
+  /* Temporada */
+  .cajas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+  .caja { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; padding: 10px; }
+  .caja p { margin: 6px 0 0; font: 16px/1.35 var(--serif); }
+  .cargas { display: grid; grid-template-columns: 120px repeat(8, 1fr); gap: 4px; align-items: center; }
+  .cargas .ep { text-align: center; font: 11px var(--mono); color: var(--suave); }
+  .cargas button { background: var(--panel2); border: 1px solid var(--borde); border-radius: 6px; padding: 4px 0; font: 600 13px var(--mono); }
+  .cargas button.mal { border-color: var(--aviso); background: #2b1b17; }
+  .mas { color: var(--mas); } .menos { color: var(--menos); }
+  .bandeja { display: flex; gap: 8px; flex-wrap: wrap; }
+  .evento { background: var(--panel2); border: 1px solid var(--borde); border-left: 3px solid var(--c, #555); border-radius: 6px; padding: 6px 9px; font-size: 12.5px; cursor: grab; }
+
+  /* Rejilla */
+  .rejilla { display: grid; grid-template-columns: 170px repeat(8, 1fr); border: 1px solid var(--borde); border-radius: 10px; overflow: hidden; }
+  .rejilla > div { border-right: 1px solid var(--borde); border-bottom: 1px solid var(--borde); padding: 6px; min-height: 44px; }
+  .rejilla .cab { background: var(--panel2); font: 11px var(--mono); color: var(--suave); text-align: center; min-height: 0; }
+  .rejilla .cab b { display: block; font: 12px var(--sans); color: var(--texto); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .rejilla .arco { background: var(--panel); font-size: 12.5px; display: flex; gap: 6px; align-items: center; }
+  .rejilla .celda { position: relative; cursor: pointer; }
+  .rejilla .celda:hover { background: #1b1c20; }
+  .rejilla .celda .linea { position: absolute; left: 0; right: 0; top: 50%; height: 3px; background: var(--c); opacity: .5; }
+  .rejilla .celda .linea.borr { background: repeating-linear-gradient(90deg, var(--c) 0 6px, transparent 6px 10px); }
+  .rejilla .celda .parada { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; text-align: center; }
+  .parada i { width: 14px; height: 14px; border-radius: 50%; background: var(--fondo); border: 3px solid var(--c); display: block; }
+  .parada i.avanza { background: var(--c); border-width: 0; width: 10px; height: 10px; }
+  .parada i.gira { background: linear-gradient(90deg, var(--c) 50%, var(--fondo) 50%); }
+  .parada i.cierra { border-radius: 2px; width: 6px; height: 16px; background: var(--c); border: 0; }
+  .rejilla .celda.olvido { background: repeating-linear-gradient(45deg, transparent 0 6px, #e07a5f14 6px 12px); }
+
+  /* Escenas */
+  .actos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .acto { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; padding: 8px; min-height: 300px; }
+  .acto h4 { margin: 0 0 8px; font: italic 17px var(--serif); font-weight: 400; display: flex; justify-content: space-between; }
+  .acto h4 small { font: 11px var(--sans); color: var(--suave); font-style: normal; }
+  .escena { background: var(--panel2); border: 1px solid var(--borde); border-radius: 8px; padding: 8px; margin-bottom: 8px; cursor: pointer; }
+  .escena.sel { border-color: var(--acento); }
+  .escena .cab2 { display: flex; justify-content: space-between; font: 11px var(--mono); color: var(--suave); }
+  .escena p { margin: 4px 0 6px; font-size: 12.5px; }
+  .escena .hilos { display: flex; gap: 4px; flex-wrap: wrap; }
+  .escena .hilo { font-size: 10.5px; padding: 1px 6px; border-radius: 99px; background: color-mix(in srgb, var(--c) 22%, transparent); color: var(--c); }
+  .escena.mal { border-color: var(--aviso); }
+  .nueva { border: 1px dashed var(--borde); border-radius: 8px; padding: 8px; text-align: center; color: var(--tenue); }
+
+  /* Panel derecho */
+  .lado { border-left: 1px solid var(--borde); background: var(--panel); display: flex; flex-direction: column; min-height: 0; }
+  .pestanas { display: flex; border-bottom: 1px solid var(--borde); }
+  .pestanas button { flex: 1; background: none; border: 0; padding: 10px 6px; color: var(--suave); border-bottom: 2px solid transparent; font-size: 12.5px; }
+  .pestanas button.on { color: var(--texto); border-bottom-color: var(--acento); }
+  .pestanas .n { font: 10px var(--mono); background: var(--panel3); border-radius: 99px; padding: 1px 6px; margin-left: 4px; }
+  .pestanas .n.mal { background: #4a2219; color: #f3a58f; }
+  .contenido { overflow: auto; padding: 14px; flex: 1; }
+  .pieza-tit { font: 24px/1.15 var(--serif); margin: 2px 0 8px; }
+  .estados { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0 12px; }
+  .estados span { font-size: 11.5px; padding: 2px 8px; border-radius: 99px; border: 1px solid var(--borde); color: var(--suave); }
+  .estados span.on { background: var(--panel3); color: var(--texto); border-color: #444; }
+  .donde { font-size: 11.5px; color: var(--tenue); margin-bottom: 10px; }
+  .efecto { padding: 8px 10px; border-radius: 6px; background: var(--panel2); margin-bottom: 6px; font-size: 12.5px; display: flex; gap: 8px; }
+  .efecto .ico { flex: none; width: 16px; text-align: center; color: var(--suave); }
+  .efecto small { display: block; color: var(--suave); margin-top: 2px; }
+  .efecto.mal { background: #26181499; border-left: 3px solid var(--aviso); }
+  .efecto.mal .ico { color: var(--aviso); }
+  .efecto.sug { border-left: 3px solid var(--suger); }
+  .efecto.sug .ico { color: var(--suger); }
+  .efecto.bien { border-left: 3px solid var(--bien); }
+  .efecto .acc { display: flex; gap: 6px; margin-top: 6px; }
+  .efecto .acc button { background: var(--panel3); border: 1px solid var(--borde); border-radius: 4px; padding: 2px 8px; font-size: 11.5px; }
+  .vacio { color: var(--tenue); font-size: 12.5px; }
+  .regla { padding: 8px 0; border-bottom: 1px solid var(--borde); font-size: 12.5px; display: flex; gap: 8px; }
+  .regla .m { flex: none; width: 16px; text-align: center; }
+  .regla small { display: block; color: var(--tenue); font-family: var(--mono); font-size: 10.5px; }
+  .pie-lado { border-top: 1px solid var(--borde); padding: 8px 14px; font-size: 11.5px; color: var(--tenue); display: flex; justify-content: space-between; }
+  .nota { position: fixed; bottom: 10px; left: 16px; font-size: 12px; color: var(--suave); background: var(--panel3); padding: 6px 10px; border-radius: 6px; border: 1px dashed #444; max-width: 640px; z-index: 5; }
+</style>
+</head>
+<body>
+<header class="barra">
+  <div class="marca">Atelier<span>Primera · prueba</span></div>
+  <nav class="pasos" id="pasos"></nav>
+  <div class="buscar">Buscar o crear…  Ctrl K</div>
+  <button class="ysi" id="ysi">¿Y si…?</button>
+  <button class="idea">+ Idea</button>
+</header>
+
+<div>
+  <section class="mapa">
+    <div class="cab"><b>La serie entera</b><span id="ubicacion"></span><span class="ley">— canon · - - borrador · ··· idea · naranja: cómo quedaría</span></div>
+    <svg id="mapa"></svg>
+  </section>
+  <div class="ysi-barra"><b>¿Y si…?</b><span class="chip">Nando se va en E05</span><span>Estás viendo cómo quedaría. Nada toca la serie hasta que pulses «Aplicar».</span>
+    <div class="der"><button id="ysi-ahora">Ver ahora</button><button>Aparcar</button><button>Descartar</button><button class="prim">Aplicar</button></div></div>
+</div>
+
+<div class="trabajo">
+  <main class="centro" id="centro"></main>
+  <aside class="lado">
+    <div class="pestanas" id="pestanas"></div>
+    <div class="contenido" id="lado"></div>
+    <div class="pie-lado"><span>● Guardado hace 2 s</span><span>Solo abierta en PC-ESTUDIO</span></div>
+  </aside>
+</div>
+
+<div class="nota" id="nota"></div>
+<div class="velo" id="velo"><div class="ventana" id="ventana"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- Reglas reales de appDatos/guia.md (id, pieza, texto, fuente, comprobación) ---------- */
+const REGLAS = [["G01", "serie", "Las 10-11 preguntas, como lista antes de dar la historia por planeada.", "§29", ""], ["G02", "serie", "Decide el final antes de escribir, aunque sea en una línea.", "§18 · F1.6", "C18"], ["G03", "serie", "La pregunta de oro nace al inicio; el final la responde.", "§18", ""], ["G04", "serie", "Todo nace de los personajes enfrentándose a sus creencias: conflicto externo, interno y filosófico.", "§3", ""], ["G05", "serie", "Logline: protagonista, objetivo, problema, acción y catalizador. Si no cabe en un párrafo, es pronto.", "§4", ""], ["G06", "serie", "Define la dinámica de la historia y repítela: siempre conflicto, cada vez más difícil, y cada capítulo acerca a la meta.", "§25", ""], ["G07", "arco de trama", "Deja muy claro qué quiere y por qué lo quiere.", "§10", "C03"], ["G08", "arco de trama", "Todo conflicto trae algo que ganar y algo que perder.", "§10", "C03"], ["G09", "arco de trama", "El riesgo es relativo a la situación del personaje, no absoluto.", "§10", ""], ["G10", "arco de trama", "Bomba de tiempo: una cuenta atrás que, al llegar a cero, hace estallar la consecuencia.", "§10", "C03"], ["G11", "arco de trama", "Usa las consecuencias como motor: dos pasos adelante, uno atrás.", "§3", ""], ["G12", "arco de trama", "La trama principal llega hasta el final de la serie: no la cierres antes del último episodio.", "§12", "C12"], ["G13", "arco de trama", "Un arco de temporada se cierra dentro de su temporada.", "§12", "C10"], ["G14", "arco de trama", "Que ningún arco desaparezca demasiados episodios seguidos: el público lo olvida.", "§25", "C11"], ["G15", "arco de trama", "Si fijas a mano dónde empieza o acaba, que coincida con los eventos que lo abren y lo cierran.", "Diseño 4.4", "C13"], ["G16", "subtrama", "Dale su propio protagonista y su propio conflicto.", "§13", "C05"], ["G17", "subtrama", "Arranca después de presentar la principal y se resuelve antes.", "§13", "C06"], ["G18", "subtrama", "Proporción 70/30 entre la principal y la subtrama.", "§13", "C07"], ["G19", "subtrama", "Únela a la principal por trama o, mejor, por tema.", "§13", ""], ["G20", "subtrama", "En B y C la bomba de tiempo no es obligatoria, pero ayuda.", "§10", "C04"], ["G21", "arco de personaje", "Separa la razón que se da a sí mismo de su razón real.", "§3", ""], ["G22", "arco de personaje", "El choque entre lo que quiere y lo que necesita es su arco.", "Met. 1.6", "C17"], ["G23", "arco de personaje", "El cambio es gradual: creencias que se traducen en acciones.", "§3", ""], ["G24", "arco de personaje", "Su final llega cuando aprende la lección sobre su defecto inicial.", "§18", ""], ["G25", "arco de personaje", "Anota cómo está al empezar y al terminar cada temporada.", "Plantilla Temporada", "C17"], ["G26", "arco de relación", "Un arco de relación cuenta cómo cambia un vínculo: de dónde parte y a dónde llega.", "Plantilla Arco", ""], ["G27", "arco de relación", "Usa las consecuencias como motor: dos pasos adelante, uno atrás.", "§3", ""], ["G28", "arco de relación", "Si es romance: tal vez sí, tal vez no, y una separación que parece irreversible antes de resolverse.", "§26", ""], ["G29", "temporada", "Cada temporada recorre su propio Story Circle y deja un gancho.", "§12", ""], ["G30", "temporada", "Punto de crisis: lo peor que le puede pasar, justo antes del clímax.", "§17", ""], ["G31", "temporada", "Antes del clímax: quién es, qué quiere, qué pasa si falla y quién se opone.", "§17", ""], ["G32", "temporada", "No resuelvas el conflicto general salvo en la última temporada.", "§12", ""], ["G33", "temporada", "Siempre una incógnita abierta: antes de resolver una pregunta, planta otra.", "§11", ""], ["G34", "temporada", "La carga cambia: si empieza en +, acaba en −, y empieza como acabó la anterior.", "§12", "C01"], ["G35", "temporada", "Elige su trama principal: con ella se comprueban las subtramas.", "Decisión D7", "C19"], ["G36", "episodio", "Resume la idea central en una frase. Varias ideas a la vez lo vuelven confuso.", "§12", ""], ["G37", "episodio", "Protagonista del capítulo, deseo, fuerza antagónica, conflicto, acción y contexto.", "§12", ""], ["G38", "episodio", "Si acaba en +, el siguiente empieza en + y acaba en −.", "§12", "C01"], ["G39", "episodio", "Nunca resuelvas el conflicto general dentro de un episodio, salvo en el último.", "§12", ""], ["G40", "episodio", "Que cada episodio acabe con alguna incógnita abierta.", "§11", "C16"], ["G41", "evento", "Cada escena tiene su microconflicto: algo que ganar y algo que perder.", "§10", "C09"], ["G42", "evento", "Toda escena cambia un valor. Si empieza y acaba igual, sobra o se fusiona.", "Escena 1.3 · F5", "C02"], ["G43", "evento", "Test de relleno: ¿hace avanzar a algún protagonista? ¿Da información o desarrolla a alguien?", "§25", "C08"], ["G44", "evento", "Los problemas los resuelve el propio protagonista, nunca otro por él.", "§16", ""], ["G45", "evento", "Si ocurre en otro tiempo del mundo, márcalo: no mezcles la Timeline con el orden de emisión.", "Regla 13", ""], ["G46", "secreto", "Constrúyelo desde el final: decide la revelación y luego siembra las pistas.", "§15 · F4", "C14"], ["G47", "secreto", "Inesperado pero coherente: las pistas tienen que encajar con la revelación.", "§15", "C15"], ["G48", "secreto", "Intriga, suspenso o misterio: decide quién lo sabe, el personaje o el público.", "§11", ""], ["G49", "secreto", "La verdad no se copia en resúmenes ni loglines antes de revelado_en.", "Regla 10", ""], ["M01", "evento", "No resuelvas un conflicto con magia que el público no entiende.", "Magia §1 · Ley 1", ""], ["M02", "secreto", "Siembra las excepciones antes de usarlas: si la revelación o la solución usa magia, el público tiene que entender antes esa regla.", "Magia §6", ""]];
+
+/* ---------- Datos de la serie de prueba (de la v1) ---------- */
+const EP = ['La señal','El aviso','Dos micrófonos','Primera guardia','El apagón','La cinta','Voz vieja','El pleno', '','','','','','','',''];
+const ARCOS = {
+  ven: { t: 'El eco', tipo: 'trama', abc: 'A', nivel: 'serie', m: 'canon', c: '#d0655b', ini: 0, fin: 17 },
+  tor: { t: 'La tormenta', tipo: 'trama', abc: 'A', nivel: 't1', m: 'canon', c: '#4fb3a9', ini: 3, fin: 6, de: 'ven' },
+  tel: { t: 'Telmo: callar o avisar', tipo: 'personaje', abc: 'A', nivel: 'serie', m: 'borrador', c: '#b48ad8', ini: 0, fin: 17 },
+  her: { t: 'Amistad rota', tipo: 'relación', abc: 'B', nivel: 't1', m: 'borrador', c: '#7fa6de', ini: 2, fin: 5 },
+  car: { t: 'La cinta oculta', tipo: 'trama', abc: 'B', nivel: 'serie', m: 'idea', c: '#d9b25f', ini: 0, fin: 9, hueco: [1, 4] },
+  amo: { t: 'Voces cruzadas', tipo: 'relación', abc: 'C', nivel: 't1', m: 'borrador', c: '#8fc47a', ini: 1, fin: 7 },
+};
+const PARADAS = [
+  ['ven',0,'abre','La llegada'],['ven',4,'avanza','Primer precio'],['ven',7,'gira','El corte'],
+  ['tor',3,'abre','Aviso'],['tor',4,'avanza','2.ª noche'],['tor',6,'cierra','Final'],
+  ['tel',0,'abre','Calla'],['tel',4,'gira','Pide ayuda'],
+  ['her',2,'abre','Nando lo sabe'],['her',4,'gira','Nando dolido'],['her',5,'cierra','Ruptura'],
+  ['car',0,'abre','La cinta'],['car',5,'avanza','Cinta rota'],
+  ['amo',1,'abre','Sabela'],['amo',7,'cierra','Despedida'],
+];
+const ESC = {
+  teaser: [['e1', 'El Alcalde cobra en la plaza', ['ven'], '+ → −']],
+  inicio: [['e2', 'Telmo y Nando ensayan; Nando pide hablar en antena', ['her', 'tor'], '+ → +'], ['e3', 'Sabela acompaña a Telmo', ['amo'], '− → +']],
+  desarrollo: [['e4', 'Segunda emisión: Telmo gana', ['tor', 'ven'], '− → +'], ['e5', 'Nando duda, dolido', ['her'], '+ → −']],
+  desenlace: [['e6', 'Telmo mantiene la emisora a costa de Nando', ['ven', 'tel', 'her'], '+ → −']],
+};
+const BANDEJA = [['El Alcalde visita la taberna', '#d0655b'], ['Sabela ve la cicatriz', '#8fc47a'], ['Alguien vigila la casa', '#d9b25f']];
+const state = { paso: 'serie', pest: 'efectos', arco: 'her', fin: 5, nivel: 't1', carga: [['+','−'],['−','+'],['+','−'],['−','+'],['+','−'],['−','+'],['+','+'],['+','−']], ysi: false, ysiVer: true, escena: 'e2', nuevo: null };
+const base = { fin: 5, nivel: 't1' };
+
+/* ---------- Utilidades ---------- */
+const $ = id => document.getElementById(id);
+const epNom = i => i < 8 ? `T1·E0${i + 1}` : i < 16 ? `T2·E0${i - 7}` : 'T3';
+const ysiActivo = () => state.ysi && state.ysiVer;
+const arcoFin = k => k === 'her' ? state.fin : ARCOS[k].fin;
+const rangoYsi = (k, fin) => (ysiActivo() && (k === 'her' || k === 'amo')) ? Math.min(fin, 4) : fin;
+const regla = id => REGLAS.find(r => r[0] === id);
+const fuente = f => f.startsWith('§') ? `Chuleta de escritura ${f}` : f;
+function toast(t) { const e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('on'), 2600); }
+// Campo con su regla de la guía: la pista sale al escribir en él.
+function campo({ label, valor = '', vacio = '', reglas = [], ancho = false, attrs = '', select = null, cambiado = false }) {
+  const pista = reglas.map(id => { const r = regla(id); return r ? `<div><b>${id}</b>${r[2]} <span style="color:var(--tenue)">· ${fuente(r[3])}</span></div>` : ''; }).join('');
+  const ctl = select ? `<select ${attrs}>${select}</select>` : `<input ${attrs} value="${valor}" placeholder="${vacio}">`;
+  return `<div class="campo ${!valor && !select ? 'vacio' : ''} ${cambiado ? 'cambiado' : ''}" ${ancho ? 'style="grid-column:1/-1"' : ''}><label>${label}${reglas.length ? ` <i>${reglas.join(' · ')}</i>` : ''}</label>${ctl}${pista ? `<div class="pista-guia">${pista}<a data-ver-guia="1">Ver en la guía</a></div>` : ''}</div>`;
+}
+
+/* ---------- Mapa de la serie: se dibuja al ancho real, sin deformar ---------- */
+function mapa() {
+  const svg = $('mapa'), W = svg.clientWidth || 1200, ks = Object.keys(ARCOS), FILA = 13;
+  const H = 24 + ks.length * FILA + 16, X0 = 170, P = (W - X0 - 8) / 18, x = i => X0 + i * P + P / 2;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.style.height = H + 'px';
+  let h = '';
+  const temp = (i0, n, t, prev) => `<g class="temp-btn" data-p="temporada"><rect x="${X0 + i0 * P}" y="2" width="${P * n - 4}" height="${H - 4}" rx="5" ${prev ? 'fill="none" stroke="#33353b" stroke-dasharray="4 4"' : 'fill="#1b1c20"'}/><text x="${X0 + i0 * P + 8}" y="15" fill="${prev ? '#5d6067' : '#a4a7ad'}" font-size="11">${t}</text></g>`;
+  h += temp(0, 8, 'T1 · Cerrar la emisora') + temp(8, 8, 'T2 · La réplica') + temp(16, 2, 'T3 prevista', true);
+  state.carga.forEach((c, i) => h += `<text x="${x(i)}" y="${H - 5}" text-anchor="middle" font-size="10" font-family="Geist Mono, monospace"><tspan fill="${c[0] === '+' ? '#d9b25f' : '#7f9bb8'}">${c[0]}</tspan><tspan fill="${c[1] === '+' ? '#d9b25f' : '#7f9bb8'}">${c[1]}</tspan></text>`);
+  let y = 28;
+  for (const k of ks) {
+    const a = ARCOS[k], fin = Math.min(rangoYsi(k, arcoFin(k)), 17), resalta = state.paso === 'tramas' && k === state.arco;
+    const dash = a.m === 'borrador' ? '7 4' : a.m === 'idea' ? '1.5 4' : '';
+    h += `<text x="6" y="${y + 4}" font-size="11" fill="${resalta ? '#e9e9eb' : '#80838a'}" data-arco="${k}" style="cursor:pointer">${a.t}</text>`;
+    const seg = (i0, i1) => i1 < i0 ? '' : `<path d="M${x(i0)} ${y} L${x(i1)} ${y}" stroke="${a.c}" stroke-width="${resalta ? 4 : 2.5}" stroke-dasharray="${dash}" stroke-linecap="round" opacity="${resalta ? 1 : .75}"/>`;
+    if (a.hueco) { h += seg(a.ini, a.hueco[0] - 1) + seg(a.hueco[1] + 1, fin) + `<rect x="${x(a.hueco[0]) - P / 2}" y="${y - 5}" width="${P * (a.hueco[1] - a.hueco[0] + 1)}" height="10" rx="2" fill="#e07a5f26"/>`; }
+    else h += seg(a.ini, fin);
+    if (a.nuevo) h += `<circle cx="${x(a.ini)}" cy="${y}" r="4" fill="${a.c}"/>`;
+    if (k === 'her' && state.fin !== base.fin) h += `<path d="M${x(Math.min(base.fin, state.fin))} ${y + 4} L${x(state.fin)} ${y + 4}" stroke="#d0743c" stroke-width="2.5" stroke-dasharray="2 4" stroke-linecap="round"/>`;
+    if (ysiActivo() && (k === 'her' || k === 'amo')) h += `<path d="M${x(4)} ${y + 4} L${x(a.fin)} ${y + 4}" stroke="#d0743c" stroke-width="2" stroke-dasharray="2 4"/><text x="${x(4) + 8}" y="${y - 3}" fill="#d0743c" font-size="10">se corta en E05</text>`;
+    y += FILA;
+  }
+  const marca = { serie: [0, 17], tramas: [ARCOS[state.arco].ini, Math.min(arcoFin(state.arco), 17)], temporada: [0, 7], episodios: [0, 7], escenas: [4, 4] }[state.paso];
+  h += `<rect x="${x(marca[0]) - P / 2 + 1}" y="1" width="${P * (marca[1] - marca[0] + 1) - 2}" height="${H - 2}" rx="5" fill="none" stroke="#d0743c" stroke-width="1.3" opacity=".75"/>`;
+  svg.innerHTML = h;
+  $('ubicacion').textContent = { serie: 'Estás en: la serie', tramas: 'Estás en: ' + ARCOS[state.arco].t, temporada: 'Estás en: T1', episodios: 'Estás en: T1 · rejilla', escenas: 'Estás en: T1 · E05 El apagón' }[state.paso] + ' · clic en una temporada o un arco para ir';
+}
+
+/* ---------- Pasos ---------- */
+const PASOS = [['serie', '1', 'Serie'], ['tramas', '2', 'Tramas'], ['temporada', '3', 'Temporada'], ['episodios', '4', 'Episodios'], ['escenas', '5', 'Escenas']];
+function pasos() { $('pasos').innerHTML = PASOS.map(([k, n, t]) => `<button class="${state.paso === k ? 'on' : ''}" data-p="${k}"><b>${n}</b>${t}</button>`).join(''); }
+const crear = (...tipos) => `<div class="crear"><span>Crear</span>${tipos.map(([k, t]) => `<button data-nuevo="${k}">+ ${t}</button>`).join('')}</div>`;
+
+/* ---------- Vistas centrales ---------- */
+const V = {};
+V.serie = () => `
+  <div class="eti">Paso 1 · Serie · orden de emisión</div>
+  <h1 class="tit">Primera · prueba</h1>
+  <p class="lema">Un técnico de radio vuelve a su pueblo para cerrar la emisora de su madre y descubre que cada noche capta una voz que lee las noticias del día siguiente.</p>
+  ${crear(['temporada', 'Temporada'], ['trama', 'Trama de serie'], ['punto', 'Punto clave'], ['secreto', 'Secreto'])}
+  <div style="margin-bottom:14px"><span class="pill">8/11 preguntas</span><span class="pill">3 temporadas · 16 ep</span><span class="pill">${Object.keys(ARCOS).length} arcos · 1 descartado</span></div>
+  <div class="tarjetas">
+    <div class="tarj"><span class="ref">G03 · §18</span><span class="eti">Pregunta de oro</span><p>¿Podrá Telmo avisar de lo que va a pasar sin provocarlo?</p></div>
+    <div class="tarj"><span class="ref">G02 · §18</span><span class="eti">Final decidido</span><p>Avisa, y la emisora enmudece para siempre.</p></div>
+    <div class="tarj"><span class="ref">G04 · §3</span><span class="eti">Pregunta filosófica</span><p>¿Se puede evitar lo que ya se ha oído?</p></div>
+  </div>
+  <div class="bloque"><div class="eti"><span>Trama global · puntos clave</span><span data-nuevo="punto" style="cursor:pointer;color:var(--acento)">+ Punto clave</span></div>${svgPuntos()}</div>
+  <div class="bloque"><div class="eti"><span>Logline · 5 piezas</span><span>G05 · §4 — haz clic en un campo para ver su regla</span></div>
+    <div class="campos">
+      ${campo({ label: 'Protagonista', valor: 'Telmo', reglas: ['G05'] })}${campo({ label: 'Objetivo', valor: 'Cerrar la emisora de su madre', reglas: ['G05'] })}
+      ${campo({ label: 'Problema', valor: 'El Alcalde quiere cerrar la emisora', reglas: ['G05'] })}${campo({ label: 'Catalizador', vacio: 'Vacío: ¿qué lo pone en marcha?', reglas: ['G05'] })}
+      ${campo({ label: 'Dinámica de la historia', valor: 'Cada noche en antena cuesta más y enfrenta a Telmo con el Alcalde', reglas: ['G06'], ancho: true })}
+    </div></div>`;
+function svgPuntos() {
+  const pts = [['Inicio', 0, '☀'], ['Detonante', 1, '⚡'], ['Giro central', 9, '⑂'], ['Crisis', 14, '☂'], ['Clímax', 16.3, '▲'], ['Fin', 17, '⚑']];
+  const W = 1160, X0 = 20, P = (W - 40) / 18, x = i => X0 + i * P + P / 2;
+  return `<svg viewBox="0 0 ${W} 74" style="width:100%;height:auto;max-height:90px"><line x1="${x(0)}" y1="38" x2="${x(17)}" y2="38" stroke="#d0655b" stroke-width="3"/>${pts.map(([t, i, ic]) => `<circle cx="${x(i)}" cy="38" r="10" fill="#16171a" stroke="#d0655b" stroke-width="2.5"/><text x="${x(i)}" y="42" text-anchor="middle" font-size="11" fill="#e9e9eb">${ic}</text><text x="${x(i)}" y="66" text-anchor="middle" font-size="12" fill="#8b8e95">${t}</text>`).join('')}<text x="${x(8.5)}" y="16" text-anchor="middle" font-size="12" fill="#d9b25f">💣 la deuda vence al final de T2</text></svg>`;
+}
+
+V.tramas = () => {
+  const a = ARCOS[state.arco], esHer = state.arco === 'her', fin = esHer ? state.fin : a.fin;
+  const fila = k => { const x = ARCOS[k]; return `<div class="fila ${k === state.arco ? 'sel' : ''} ${x.de ? 'sang' : ''}" data-arco="${k}"><span class="barra-c" style="background:${x.c}"></span><span class="t">${x.t}<small>${x.de ? 'Tramo de El eco · T1' : (x.tipo === 'trama' ? 'Trama' : 'Arco de ' + x.tipo) + (x.nivel === 'serie' ? ' de serie' : ' · T1')}${x.nuevo ? ' · nueva' : ''}</small></span>${k === 'car' || x.nuevo ? '<span class="tri">▲</span>' : ''}<span class="madurez m-${x.m}"></span><span class="abc">${x.abc}</span></div>`; };
+  const ks = Object.keys(ARCOS), opt = (v, t) => `<option value="${v}" ${fin === v ? 'selected' : ''}>${t}</option>`;
+  const B = esHer ? ['Nando descubre lo que ha firmado Telmo.', 'Nando se ofrece a hablar en antena para pagar su parte.', 'Nando duda, dolido por culpa de Telmo.', '', 'Nando no perdona la firma.'] : ['', '', '', '', ''];
+  const D = esHer ? ['T1·E03', 'T1·E04', 'T1·E05', '—', epNom(fin)] : ['—', '—', '—', '—', '—'];
+  return `
+  <div class="eti">Paso 2 · Tramas y arcos · el taller</div>
+  <h1 class="tit">Tramas de Primera · prueba</h1>
+  <p class="lema">Primero qué quiere cada una y qué arriesga; luego dónde cae.</p>
+  ${crear(['trama', 'Trama de serie'], ['trama-t', 'Trama de temporada'], ['tramo', 'Tramo de un arco'], ['personaje', 'Arco de personaje'], ['relacion', 'Arco de relación'])}
+  <div class="taller">
+    <div class="lista">
+      <div class="grupo"><span>De serie</span><span data-nuevo="trama" style="cursor:pointer">+</span></div>${ks.filter(k => ARCOS[k].nivel === 'serie' || ARCOS[k].de).map(fila).join('')}
+      <div class="grupo"><span>De temporada</span><span data-nuevo="trama-t" style="cursor:pointer">+</span></div>${ks.filter(k => ARCOS[k].nivel !== 'serie' && !ARCOS[k].de).map(fila).join('')}
+      <div class="grupo"><span>Descartadas · 1</span></div><div class="fila desc"><span class="barra-c" style="background:#555"></span><span class="t">Nando se va en E05<small>descartada el 19-10 · «demasiado pronto»</small></span></div>
+    </div>
+    <div>
+      <div class="bloque">
+        <div class="eti"><span>${a.tipo === 'trama' ? 'Trama' : 'Arco de ' + a.tipo} · ${a.abc} · ${a.nivel === 'serie' ? 'de serie' : 'de temporada (T1)'}</span><span>${a.m}</span></div>
+        <div style="font:28px var(--serif)">${a.t}</div>
+      </div>
+      <div class="bloque"><div class="eti"><span>Los cinco beats</span><span>plantilla Arco</span></div>
+        <div class="beats">${['Planteamiento', 'Complicación', 'Punto medio', 'Crisis', 'Resolución'].map((t, i) => `<div class="beat ${B[i] ? '' : 'vacia'}"><div class="eti">${t}</div><div class="donde">${D[i]}</div><p>${B[i] || 'Vacío: ¿qué pasa aquí?'}</p></div>`).join('')}</div></div>
+      <div class="bloque"><div class="eti"><span>Campos guiados</span><span>haz clic en un campo: debajo sale la regla de tu guía</span></div>
+        <div class="campos">
+          ${campo({ label: 'Nivel', reglas: ['G13'], attrs: 'data-c="nivel"', select: `<option value="t1" ${state.nivel === 't1' ? 'selected' : ''}>Temporada 1</option><option value="serie" ${state.nivel === 'serie' ? 'selected' : ''}>Toda la serie</option>`, cambiado: esHer && state.nivel !== base.nivel })}
+          ${campo({ label: 'Protagonistas', valor: esHer ? '[[Telmo]], [[Nando]]' : '', vacio: 'Vacío', reglas: a.abc !== 'A' ? ['G16'] : [] })}
+          ${campo({ label: 'Empieza en', reglas: ['G15'], select: '<option>T1·E03 Dos micrófonos</option>' })}
+          ${esHer ? campo({ label: 'Termina en', reglas: ['G13', 'G15'], attrs: 'data-c="fin"', select: opt(5, 'T1·E06 La cinta') + opt(7, 'T1·E08 El pleno') + opt(11, 'T2·E04'), cambiado: fin !== base.fin }) : campo({ label: 'Termina en', reglas: ['G13', 'G15'], select: `<option>${a.fin >= 16 ? 'sin cierre (→ T3)' : epNom(a.fin)}</option>` })}
+          ${campo({ label: 'Qué quiere y por qué', valor: esHer ? 'Nando quiere que Telmo deje de cargar solo' : '', vacio: 'Vacío', reglas: ['G07'] })}
+          ${campo({ label: 'Qué se lo impide', valor: esHer ? 'Telmo calla para protegerlo' : '', vacio: 'Vacío', reglas: [] })}
+          ${campo({ label: 'Qué gana', valor: esHer ? 'Un amigo que pide ayuda' : '', vacio: 'Vacío', reglas: ['G08'] })}
+          ${campo({ label: 'Qué pierde', valor: esHer ? 'A su amigo durante una temporada' : '', vacio: 'Vacío', reglas: ['G08', 'G09'] })}
+          ${campo({ label: 'Bomba de tiempo', vacio: a.abc === 'A' ? 'Vacío: en una trama A falta (G10)' : 'Vacío: en B y C no es obligatoria, pero ayuda', reglas: ['G10', 'G20'] })}
+          ${campo({ label: 'Pegamento con la principal', valor: esHer ? 'Por tema: la herencia callada' : '', vacio: 'Vacío', reglas: ['G19'] })}
+        </div></div>
+    </div>
+  </div>`;
+};
+
+V.temporada = () => `
+  <div class="eti">Paso 3 · Temporada 1 · en marcha</div>
+  <h1 class="tit">Cerrar la emisora</h1>
+  <p class="lema">¿Cerrará Telmo la emisora que su madre dejó encendida? · Tema: la herencia callada · Trama principal: El eco</p>
+  ${crear(['episodio', 'Episodio'], ['evento', 'Evento a la bandeja'], ['secreto', 'Secreto'], ['trama-t', 'Trama de esta temporada'])}
+  <div class="cajas">
+    <div class="caja"><span class="eti">Punto de partida</span><p>Telmo vuelve a Cabo Sal.</p></div>
+    <div class="caja"><span class="eti">Estructura · G30 G31</span><p>Detonante E01 · punto medio E05 · crisis E07 · clímax E08</p></div>
+    <div class="caja"><span class="eti">Punto de llegada · G34</span><p>Telmo mantiene la emisora y pierde a Nando.</p></div>
+    <div class="caja"><span class="eti">Cierre / cliffhanger · G29</span><p>La cinta: la voz era la de su madre.</p></div>
+  </div>
+  <div class="bloque"><div class="eti"><span>Curva de carga · pulsa un + o − · G34 G38</span><span>T1: + → −</span></div>
+    <div class="cargas"><span class="eti">Episodio</span>${EP.slice(0, 8).map((t, i) => `<span class="ep">E0${i + 1}</span>`).join('')}
+      <span class="eti">Empieza</span>${state.carga.map((c, i) => `<button data-carga="${i}-0" class="${cargaMal(i, 0) ? 'mal' : ''}"><span class="${c[0] === '+' ? 'mas' : 'menos'}">${c[0]}</span></button>`).join('')}
+      <span class="eti">Acaba</span>${state.carga.map((c, i) => `<button data-carga="${i}-1" class="${cargaMal(i, 1) ? 'mal' : ''}"><span class="${c[1] === '+' ? 'mas' : 'menos'}">${c[1]}</span></button>`).join('')}
+    </div></div>
+  <div class="bloque"><div class="eti"><span>Secretos de la temporada · G46 G47</span><span>🌱 pista · 👻 pista falsa · 👁 revelación</span></div>
+    <div class="cargas"><span>Quién grabó la cinta <small style="color:var(--suave)">mayor</small></span><span></span><span class="ep">🌱</span><span></span><span class="ep">👻</span><span></span><span class="ep">🌱</span><span></span><span class="ep">→ T2</span>
+      <span>El solar nunca fue del Ayuntamiento <small style="color:var(--suave)">central</small></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span class="ep" style="color:var(--aviso)">👁 sin pistas</span></div></div>
+  <div class="bloque"><div class="eti"><span>Bandeja · eventos sin episodio</span><span data-nuevo="evento" style="cursor:pointer;color:var(--acento)">+ Evento</span></div>
+    <div class="bandeja">${BANDEJA.map(([t, c]) => `<span class="evento" style="--c:${c}">${t}</span>`).join('')}</div></div>`;
+function cargaMal(i, lado) {
+  const c = state.carga; if (c[i][0] === c[i][1]) return true;
+  if (lado === 0 && i > 0 && c[i][0] !== c[i - 1][1]) return true;
+  if (lado === 1 && i < 7 && c[i][1] !== c[i + 1][0]) return true;
+  return false;
+}
+
+V.episodios = () => {
+  const ks = Object.keys(ARCOS);
+  let h = `<div class="eti">Paso 4 · Episodios · rejilla de la temporada 1</div><h1 class="tit">Tramas por episodio</h1>
+    <p class="lema">Filas = arcos, columnas = episodios. Cada parada es un evento: ○ abre · ● avanza · ◐ gira · ▮ cierra. Clic en una celda vacía crea un evento ahí.</p>
+    ${crear(['episodio', 'Episodio'], ['evento', 'Evento'])}<div class="rejilla"><div class="cab"></div>`;
+  h += EP.slice(0, 8).map((t, i) => `<div class="cab">E0${i + 1}<b>${t}</b><span class="${state.carga[i][1] === '+' ? 'mas' : 'menos'}">${state.carga[i].join(' ')}</span></div>`).join('');
+  for (const k of ks) {
+    const a = ARCOS[k], fin = rangoYsi(k, arcoFin(k));
+    h += `<div class="arco"><span style="width:3px;height:22px;background:${a.c};border-radius:2px;display:inline-block"></span>${a.t}</div>`;
+    for (let i = 0; i < 8; i++) {
+      const dentro = i >= a.ini && i <= fin && !(a.hueco && i >= a.hueco[0] && i <= a.hueco[1]);
+      const p = PARADAS.find(q => q[0] === k && q[1] === i && i <= fin), olvido = a.hueco && i >= a.hueco[0] && i <= a.hueco[1];
+      h += `<div class="celda ${olvido ? 'olvido' : ''}" style="--c:${a.c}" ${p ? '' : `data-nuevo="evento" data-en="${k}-${i}"`}>${dentro ? `<div class="linea ${a.m !== 'canon' ? 'borr' : ''}"></div>` : ''}${p ? `<div class="parada"><i class="${p[2]}"></i>${p[3]}</div>` : ''}</div>`;
+    }
+  }
+  return h + '</div>';
+};
+
+V.escenas = () => {
+  const tarj = ([id, t, hs, v]) => { const [a, b] = v.split(' → '); return `<div class="escena ${state.escena === id ? 'sel' : ''} ${a === b ? 'mal' : ''}" data-esc="${id}"><div class="cab2"><span>${id.toUpperCase()}</span><span class="${b === '+' ? 'mas' : 'menos'}">${v}</span></div><p>${t}</p><div class="hilos">${hs.map(k => `<span class="hilo" style="--c:${ARCOS[k].c}">${ARCOS[k].t}</span>`).join('')}</div></div>`; };
+  const col = (k, t) => `<div class="acto"><h4>${t}<small>${ESC[k].length} esc.</small></h4>${ESC[k].map(tarj).join('')}<div class="nueva" data-nuevo="escena" data-en="${k}" style="cursor:pointer">+ Escena</div></div>`;
+  return `<div class="eti">Paso 5 · Escenas · T1 · E05 · propuesta</div><h1 class="tit">El apagón</h1>
+    <p class="lema">Telmo mantiene la emisora en el aire, pero el Alcalde se lo cobra a su manera: alguien cercano paga por él.</p>
+    ${crear(['escena', 'Escena'], ['episodio', 'Episodio'])}
+    <div class="actos">${col('teaser', 'Teaser')}${col('inicio', 'Inicio')}${col('desarrollo', 'Desarrollo')}${col('desenlace', 'Desenlace')}</div>`;
+};
+
+/* ---------- Ventana «Nueva pieza» ---------- */
+const TIPOS = {
+  idea: { t: 'Idea suelta', piezas: [], dentro: ['Serie'], ruta: 'appDatos/prueba/ideas/' },
+  trama: { t: 'Trama de serie', piezas: ['arco de trama'], dentro: ['Serie'], ruta: 'appDatos/prueba/arcos/', wiki: '01_Narrativa/Arcos/' },
+  'trama-t': { t: 'Trama de temporada', piezas: ['arco de trama', 'subtrama'], dentro: ['T1', 'T2'], ruta: 'appDatos/prueba/arcos/', wiki: '01_Narrativa/Arcos/' },
+  tramo: { t: 'Tramo de un arco', piezas: ['arco de trama'], dentro: ['El eco en T2', 'Telmo en T2'], ruta: 'appDatos/prueba/arcos/', wiki: '01_Narrativa/Arcos/' },
+  personaje: { t: 'Arco de personaje', piezas: ['arco de personaje'], dentro: ['Serie', 'T1', 'T2'], ruta: 'appDatos/prueba/arcos/', wiki: '01_Narrativa/Arcos/' },
+  relacion: { t: 'Arco de relación', piezas: ['arco de relación'], dentro: ['Serie', 'T1', 'T2'], ruta: 'appDatos/prueba/arcos/', wiki: '01_Narrativa/Arcos/' },
+  temporada: { t: 'Temporada', piezas: ['temporada'], dentro: ['Serie (después de T3)'], ruta: 'appDatos/prueba/temporadas/', wiki: '01_Narrativa/Temporadas/' },
+  episodio: { t: 'Episodio', piezas: ['episodio'], dentro: ['T1 (al final)', 'T2'], ruta: 'appDatos/prueba/episodios/', wiki: '01_Narrativa/Episodios/' },
+  escena: { t: 'Escena', piezas: ['evento'], dentro: ['E05 · Teaser', 'E05 · Inicio', 'E05 · Desarrollo', 'E05 · Desenlace'], ruta: 'appDatos/prueba/eventos/', wiki: 'escaleta del episodio' },
+  evento: { t: 'Evento', piezas: ['evento'], dentro: ['Bandeja de T1', 'T1·E01', 'T1·E06'], ruta: 'appDatos/prueba/eventos/', wiki: 'escaleta del episodio' },
+  secreto: { t: 'Secreto', piezas: ['secreto'], dentro: ['Serie', 'T1', 'T2'], ruta: 'appDatos/prueba/secretos/', wiki: '01_Narrativa/Secretos/' },
+  punto: { t: 'Punto clave', piezas: ['serie'], dentro: ['Trama global'], ruta: 'appDatos/prueba/serie.md', wiki: '' },
+};
+function abrirNuevo(tipo, en) { state.nuevo = { tipo, en, titulo: '', estado: 'idea' }; ventana(); $('velo').classList.add('on'); setTimeout(() => { const i = $('nuevo-tit'); i && i.focus(); }, 30); }
+function ventana() {
+  const n = state.nuevo, T = TIPOS[n.tipo];
+  const reglas = REGLAS.filter(r => T.piezas.includes(r[1]));
+  const ruta = n.estado === 'idea' ? `${T.ruta}${n.tipo === 'punto' ? '' : (n.titulo || 'sin título') + '.md'}  · mesa (idea)` : (T.wiki ? `MiSerie/01_Wiki/${T.wiki}${T.wiki.endsWith('/') ? (n.titulo || 'sin título') + '.md' : ''}  · wiki (borrador, con su plantilla y entrada en Log.md)` : 'appDatos/prueba/serie.md');
+  let dentro = T.dentro; if (n.tipo === 'escena' && n.en) dentro = [{ teaser: 'E05 · Teaser', inicio: 'E05 · Inicio', desarrollo: 'E05 · Desarrollo', desenlace: 'E05 · Desenlace' }[n.en], ...T.dentro.filter(d => !d.toLowerCase().includes(n.en))];
+  if (n.tipo === 'evento' && n.en) { const [k, i] = n.en.split('-'); dentro = [`T1·E0${+i + 1} · ${ARCOS[k].t}`, ...T.dentro]; }
+  $('ventana').innerHTML = `
+    <div class="izq">
+      <div class="eti">Nueva pieza</div><h2>${T.t}</h2>
+      <div class="tipos">${Object.keys(TIPOS).map(k => `<button class="${k === n.tipo ? 'on' : ''}" data-tipo="${k}">${TIPOS[k].t}</button>`).join('')}</div>
+      <div class="campo"><label>Título o idea en una frase</label><input id="nuevo-tit" value="${n.titulo}" placeholder="Escribe sin miedo: nada es obligatorio"></div>
+      <div class="campo"><label>Dentro de</label><select>${dentro.map(d => `<option>${d}</option>`).join('')}</select></div>
+      <div class="campo"><label>Empieza como</label>
+        <div class="radio"><label class="${n.estado === 'idea' ? 'on' : ''}" data-est="idea"><b>Idea</b><small>En la mesa de borradores. Para probar.</small></label>
+        <label class="${n.estado === 'borrador' ? 'on' : ''}" data-est="borrador"><b>Borrador</b><small>En la wiki, con su plantilla. Ya va en serio.</small></label></div></div>
+      <div class="ruta">Se guardará en: ${ruta}</div>
+      <div class="botones"><button data-cerrar="1">Cancelar</button><button class="prim" data-crear="1">Crear</button></div>
+    </div>
+    <div class="der">
+      <div class="eti" style="margin-bottom:6px">Lo que te pedirán tus guías</div>
+      ${reglas.length ? reglas.map(r => `<div class="regla-n"><b>${r[0]}</b>${r[2]}<small>${fuente(r[3])}${r[4] ? ' · se comprueba solo (' + r[4] + ')' : ' · solo de lectura'}</small></div>`).join('') : '<p class="vacio">Una idea suelta no tiene reglas: escribe libre. Cuando la conviertas en trama, temporada o episodio, verás aquí lo que le pide la guía.</p>'}
+      <div class="aviso-crear">${n.tipo === 'trama' ? 'Al crearla verás en «Si lo dejas así» qué falta: qué quiere (G07), qué gana y pierde (G08) y bomba de tiempo (G10).' : ''}</div>
+    </div>`;
+}
+function crearPieza() {
+  const n = state.nuevo, tit = ($('nuevo-tit').value || 'Sin título').trim();
+  if (['trama', 'trama-t', 'tramo', 'personaje', 'relacion'].includes(n.tipo)) {
+    const k = 'n' + Date.now(); const tipo = n.tipo === 'personaje' ? 'personaje' : n.tipo === 'relacion' ? 'relación' : 'trama';
+    ARCOS[k] = { t: tit, tipo, abc: n.tipo === 'trama' ? 'A' : 'B', nivel: n.tipo === 'trama' || n.tipo === 'personaje' ? 'serie' : 't1', m: n.estado, c: '#e3a07a', ini: 8, fin: 8, nuevo: true };
+    state.arco = k; state.paso = 'tramas';
+  } else if (n.tipo === 'escena') {
+    const acto = n.en || 'inicio'; ESC[acto].push(['e' + (Object.values(ESC).flat().length + 1), tit, [], '+ → +']); state.paso = 'escenas'; state.escena = ESC[acto].at(-1)[0];
+  } else if (n.tipo === 'evento' && !n.en) { BANDEJA.push([tit, '#e3a07a']); state.paso = 'temporada'; }
+  state.pest = 'efectos'; $('velo').classList.remove('on');
+  toast(`«${tit}» creada como ${n.estado} · ${n.estado === 'idea' ? 'mesa de borradores' : 'wiki'}`);
+  pintar();
+}
+
+/* ---------- Panel derecho: Editar · Si lo dejas así · Guía ---------- */
+function tipoPieza() {
+  if (state.paso === 'tramas') { const a = ARCOS[state.arco]; return a.tipo === 'trama' ? (a.abc === 'A' ? ['arco de trama'] : ['arco de trama', 'subtrama']) : ['arco de ' + a.tipo, ...(a.abc !== 'A' ? ['subtrama'] : [])]; }
+  return { serie: ['serie'], temporada: ['temporada', 'secreto'], episodios: ['episodio'], escenas: ['evento'] }[state.paso];
+}
+function falla(id) {
+  const a = ARCOS[state.arco];
+  switch (id) {
+    case 'G05': return true;
+    case 'G07': return state.paso === 'tramas' && !!a.nuevo;
+    case 'G08': return state.paso === 'tramas' && !!a.nuevo;
+    case 'G10': return state.paso === 'tramas' && a.abc === 'A' && !!a.nuevo;
+    case 'G13': return state.paso === 'tramas' && state.arco === 'her' && state.fin >= 8 && state.nivel === 't1';
+    case 'G14': return state.paso === 'episodios';
+    case 'G20': return state.paso === 'tramas' && a.abc !== 'A';
+    case 'G34': case 'G38': return state.carga.some((c, i) => cargaMal(i, 0) || cargaMal(i, 1));
+    case 'G42': return Object.values(ESC).flat().some(e => { const [x, y] = e[3].split(' → '); return x === y; });
+    case 'G46': return state.paso === 'temporada';
+    default: return false;
+  }
+}
+function efectos() {
+  const out = [], a = ARCOS[state.arco];
+  if (state.paso === 'tramas' && a.nuevo) {
+    out.push(['', '✚', `«${a.t}» está en la ${a.m === 'idea' ? 'mesa de borradores' : 'wiki'} y en el mapa`, 'Aún sin episodios: fija dónde empieza y acaba']);
+    out.push(['mal', '▲', `<b>G07</b> — ${regla('G07')[2]}`, 'Falta «Qué quiere y por qué».', true]);
+    out.push(['mal', '▲', `<b>G08</b> — ${regla('G08')[2]}`, 'Faltan «Qué gana» y «Qué pierde».', true]);
+    if (a.abc === 'A') out.push(['mal', '▲', `<b>G10</b> — ${regla('G10')[2]}`, 'Una trama A sin bomba de tiempo.', true]);
+  } else if (state.paso === 'tramas' && state.arco === 'her') {
+    if (state.fin !== base.fin) {
+      const i0 = Math.min(base.fin, state.fin) + 1, i1 = Math.max(base.fin, state.fin), l = []; for (let i = i0; i <= i1; i++) l.push(epNom(i));
+      out.push(['', '◐', (state.fin > base.fin ? 'El arco pasa también por ' : 'Deja de pasar por ') + l.join(', '), l.length + ' episodios cambian su lista de arcos en la rejilla']);
+      out.push(['', '◇', 'El beat «Resolución» se mueve a ' + epNom(state.fin), 'Se reescribe en la ficha del arco']);
+      if (state.fin >= 8 && state.nivel === 't1') out.push(['mal', '▲', `<b>G13</b> — ${regla('G13')[2]}`, 'Termina en T2 pero su nivel es T1. Cámbialo a «Toda la serie» o ciérralo en T1.', true]);
+      if (state.fin >= 8) out.push(['', '◆', '[[Nando]] sigue enfrentado a Telmo al empezar T2', 'Afecta a la ficha de Nando: estado al empezar T2']);
+      if (state.fin === 7) out.push(['sug', '◇', 'Cierra en el mismo episodio que «Voces cruzadas»', 'Dos arcos B/C cierran juntos en E08']);
+    }
+    if (state.nivel !== base.nivel) out.push(['', '◎', 'Pasa a ser arco de serie', 'Necesitará tramos en T2 y T3']);
+    out.push(['sug', '◇', `<b>G20</b> — ${regla('G20')[2]}`, 'Sin bomba de tiempo.', true]);
+    if (state.fin === base.fin && state.nivel === base.nivel) out.unshift(['vacio', '', 'Cambia «Termina en» o «Nivel» para ver aquí a qué afecta.', '']);
+  } else if (state.paso === 'tramas') {
+    out.push(['vacio', '', 'Elige «Amistad rota» y cambia «Termina en» para ver las consecuencias.', '']);
+  }
+  if (state.paso === 'temporada') {
+    let alguno = false;
+    state.carga.forEach((c, i) => {
+      if (c[0] === c[1]) { alguno = true; out.push(['mal', '▲', `<b>G38</b> — E0${i + 1} empieza y acaba igual (${c[0]} → ${c[1]}).`, 'Si no cambia el valor, el episodio no avanza.', true]); }
+      if (i > 0 && c[0] !== state.carga[i - 1][1]) { alguno = true; out.push(['mal', '▲', `<b>G38</b> — E0${i} acaba en ${state.carga[i - 1][1]} y E0${i + 1} empieza en ${c[0]}.`, regla('G38')[2], true]); }
+    });
+    out.push(['mal', '▲', `<b>G46</b> — «El solar nunca fue del Ayuntamiento» se revela en E08 sin ninguna pista antes.`, regla('G46')[2], true]);
+    if (!alguno) out.push(['bien', '✓', 'La curva de carga encaja', 'Pulsa un + o − para ver qué rompe un cambio']);
+  }
+  if (state.paso === 'serie') {
+    out.push(['sug', '◇', `<b>G05</b> — Logline: falta el catalizador.`, regla('G05')[2], true]);
+    out.push(['bien', '✓', '<b>G02</b> — El final está decidido.', '']);
+  }
+  if (state.paso === 'episodios') {
+    out.push(['mal', '▲', '<b>G14</b> — «La cinta oculta» desaparece de E02 a E05.', regla('G14')[2], true]);
+    out.push(['bien', '✓', '<b>G17</b> — Las subtramas arrancan después de la principal (El eco abre en E01).', '']);
+  }
+  if (state.paso === 'escenas') {
+    Object.values(ESC).flat().forEach(e => { const [x, y] = e[3].split(' → '); if (x === y) out.push(['mal', '▲', `<b>G42</b> — ${e[0].toUpperCase()} «${e[1]}» empieza y acaba en ${x}.`, regla('G42')[2], true]); });
+    out.push(['', '◐', 'E6 cierra un beat de «Amistad rota» y avanza «El eco»', 'Si la mueves de episodio, cambian los dos arcos en la rejilla']);
+  }
+  if (ysiActivo()) {
+    out.unshift(['mal', '▲', `<b>G24</b> — «Amistad rota» se cierra por muerte, no por cambio.`, regla('G24')[2] + ' · prueba «Nando se va en E05»', true]);
+    out.unshift(['', '◐', '«Voces cruzadas» pierde a su segundo personaje en E05', 'Se cortan 3 episodios del arco']);
+  }
+  return out;
+}
+function lado() {
+  const ef = efectos(), piezas = tipoPieza(), reglas = REGLAS.filter(r => piezas.includes(r[1])), nMal = reglas.filter(r => falla(r[0])).length;
+  $('pestanas').innerHTML = [['editar', 'Editar', ''], ['efectos', 'Si lo dejas así', ef.filter(e => e[0] !== 'vacio').length], ['guia', 'Guía', nMal]].map(([k, t, n]) => `<button class="${state.pest === k ? 'on' : ''}" data-pest="${k}">${t}${n !== '' ? `<span class="n ${k === 'guia' && n ? 'mal' : ''}">${n}</span>` : ''}</button>`).join('');
+  const a = ARCOS[state.arco];
+  const titulo = { serie: ['Serie', 'Primera · prueba', 'appDatos/prueba/serie.md · mesa'], tramas: [(a.tipo === 'trama' ? 'Trama' : 'Arco de ' + a.tipo) + ' · ' + a.abc, a.t, a.m === 'idea' ? 'appDatos/prueba/arcos/' + a.t + '.md · mesa' : 'MiSerie/01_Wiki/01_Narrativa/Arcos/' + a.t + '.md · wiki'], temporada: ['Temporada', 'T1 · Cerrar la emisora', 'MiSerie/01_Wiki/01_Narrativa/Temporadas/T01.md · wiki'], episodios: ['Temporada', 'T1 · rejilla', 'wiki · Episodios/'], escenas: ['Episodio · propuesta', 'T1·E05 El apagón', 'appDatos/prueba/episodios/ep-a105.md · mesa'] }[state.paso];
+  const est = ['idea', 'propuesta', 'aparcado', 'borrador', 'canon', 'descartado'], on = state.paso === 'escenas' ? 'propuesta' : state.paso === 'tramas' ? a.m : 'canon';
+  let h = `<div class="eti">${titulo[0]}</div><div class="pieza-tit">${titulo[1]}</div><div class="estados">${est.map(e => `<span class="${e === on ? 'on' : ''}">${e}${e === 'canon' && on === 'canon' ? ' 🔒' : ''}</span>`).join('')}</div><div class="donde">${titulo[2]}</div>`;
+  if (state.pest === 'efectos') h += ef.map(([c, ico, t, s, acc]) => c === 'vacio' ? `<p class="vacio">${t}</p>` : `<div class="efecto ${c}"><span class="ico">${ico}</span><div>${t}${s ? `<small>${s}</small>` : ''}${acc ? '<div class="acc"><button>Ir al campo</button><button data-pest="guia">Ver regla</button><button>Seguir así (a propósito)</button></div>' : ''}</div></div>`).join('');
+  if (state.pest === 'guia') {
+    h += `<div class="guias-activas">Guías activas: <a>Guía de Atelier</a> (appDatos/guia.md) · <a>Chuleta de escritura de series</a> · <a>Plantillas</a> · Chuleta de magia: <i>desactivada</i></div>`;
+    h += `<div class="grupo-reglas">Para ${piezas.join(' y ')} · ${reglas.length} reglas · ${nMal} sin cumplir</div>`;
+    h += reglas.map(r => { const mal = falla(r[0]), comp = !!r[4]; const st = mal ? '✗' : comp ? '✓' : '·'; const col = mal ? 'var(--aviso)' : comp ? 'var(--bien)' : 'var(--tenue)';
+      return `<div class="regla"><span class="m" style="color:${col}">${st}</span><div>${r[2]}<small>${r[0]} · ${fuente(r[3])} · ${mal ? 'no se cumple' : comp ? 'se cumple' : 'solo de lectura: lo juzgas tú'}</small></div></div>`; }).join('');
+    h += `<p class="vacio" style="margin-top:10px">Editas las reglas en appDatos/guia.md (o desde aquí): una fila por regla.</p>`;
+  }
+  if (state.pest === 'editar') h += `<div class="campo"><label>Notas libres</label><textarea style="min-height:180px">Escribe lo que quieras: no hay campos obligatorios. Se guarda solo en la mesa o en la wiki según su estado.</textarea></div><div style="margin-top:10px" class="vacio">Pasar a borrador crea la ficha en la wiki con su plantilla y una entrada en Log.md.</div>`;
+  $('lado').innerHTML = h;
+}
+
+/* ---------- Pintar ---------- */
+const NOTAS = {
+  serie: 'Paso 1: la serie entera. Arriba, «Crear» en cada nivel; clic en un campo de la logline y debajo sale su regla de la guía. Prueba «+ Idea» o «+ Trama de serie».',
+  tramas: 'Paso 2: crea una trama con «+ Trama de serie» y mira «Si lo dejas así». O elige «Amistad rota» y cambia «Termina en» a T2·E04.',
+  temporada: 'Paso 3: pulsa un + o − de la curva de carga. Se marcan en rojo los episodios que dejan de encajar y la regla.',
+  episodios: 'Paso 4: la rejilla. Clic en una celda vacía crea un evento ahí. Las rayas rojizas marcan dónde un arco desaparece.',
+  escenas: 'Paso 5: «+ Escena» en cada acto. Activa «¿Y si…?» arriba para ver la prueba «Nando se va en E05».',
+};
+function pintar() {
+  document.body.classList.toggle('ysi-on', state.ysi);
+  $('ysi').classList.toggle('on', state.ysi);
+  $('ysi-ahora').textContent = state.ysiVer ? 'Ver ahora' : 'Ver cómo quedaría';
+  pasos(); $('centro').innerHTML = V[state.paso](); mapa(); lado(); $('nota').textContent = 'Boceto G — ' + NOTAS[state.paso];
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-p],[data-pest],[data-arco],[data-carga],[data-esc],[data-nuevo],[data-tipo],[data-est],[data-crear],[data-cerrar],[data-ver-guia],#ysi,#ysi-ahora,.idea');
+  if (!t) { if (e.target.id === 'velo') $('velo').classList.remove('on'); return; }
+  if (t.classList.contains('idea')) return abrirNuevo('idea');
+  if (t.dataset.nuevo) return abrirNuevo(t.dataset.nuevo, t.dataset.en);
+  if (t.dataset.tipo) { state.nuevo.titulo = $('nuevo-tit').value; state.nuevo.tipo = t.dataset.tipo; state.nuevo.en = null; return ventana(); }
+  if (t.dataset.est) { state.nuevo.titulo = $('nuevo-tit').value; state.nuevo.estado = t.dataset.est; return ventana(); }
+  if (t.dataset.crear) return crearPieza();
+  if (t.dataset.cerrar) return $('velo').classList.remove('on');
+  if (t.dataset.verGuia) state.pest = 'guia';
+  else if (t.dataset.p) { state.paso = t.dataset.p; state.pest = 'efectos'; }
+  else if (t.dataset.pest) state.pest = t.dataset.pest;
+  else if (t.dataset.arco) { state.arco = t.dataset.arco; state.paso = 'tramas'; }
+  else if (t.dataset.carga) { const [i, l] = t.dataset.carga.split('-').map(Number); state.carga[i][l] = state.carga[i][l] === '+' ? '−' : '+'; }
+  else if (t.dataset.esc) state.escena = t.dataset.esc;
+  else if (t.id === 'ysi') { state.ysi = !state.ysi; state.ysiVer = true; }
+  else if (t.id === 'ysi-ahora') state.ysiVer = !state.ysiVer;
+  pintar();
+});
+document.addEventListener('input', e => { if (e.target.id === 'nuevo-tit') { const r = document.querySelector('.ruta'); state.nuevo.titulo = e.target.value; if (r) { ventana(); const i = $('nuevo-tit'); i.focus(); i.setSelectionRange(i.value.length, i.value.length); } } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') $('velo').classList.remove('on'); if (e.key === 'Enter' && $('velo').classList.contains('on')) crearPieza(); if (e.ctrlKey && e.code === 'Space') { e.preventDefault(); abrirNuevo('idea'); } });
+document.addEventListener('change', e => {
+  const c = e.target.dataset.c; if (!c) return;
+  if (c === 'fin') state.fin = +e.target.value; if (c === 'nivel') state.nivel = e.target.value;
+  state.pest = 'efectos'; pintar();
+});
+window.addEventListener('resize', mapa);
+pintar();
+
+</script>
+</body>
+</html>

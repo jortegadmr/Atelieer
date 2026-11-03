@@ -1,0 +1,34 @@
+# Ficheros que NO se copian del repositorio privado al público.
+# Una ruta por línea, relativa a la raíz. Barra final = carpeta entera.
+# Se admiten comodines (*). Las líneas con # son comentarios.
+
+# --- Documentos de instrucciones para agentes de IA (nunca en el público) ---
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.claude/
+.agent/
+.agents/
+.cursor/
+.cursorrules
+.windsurfrules
+.github/copilot-instructions.md
+
+# --- Diario y notas internas del repositorio privado ---
+REGISTRO.md
+docs/estado.md
+.vscode/settings.json
+
+# --- Propios del público (reescritos aquí; no se sobrescriben) ---
+README.md
+tools/
+.gitignore
+compilar-windows.bat
+# package.json lleva aquí el campo "author"; si cambian las dependencias, sincronizarlo a mano.
+package.json
+
+# --- Serie ficticia pública (la serie real del privado nunca se copia) ---
+scripts/datos-prueba.ts
+scripts/datos-grande.ts
+tests/fixtures/wiki.ts
+tests/fixtures/guion-ejemplo.txt

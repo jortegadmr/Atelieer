@@ -1,0 +1,44 @@
+name: mac
+
+# Se lanza a mano: GitHub › Actions › mac › Run workflow
+on:
+  workflow_dispatch:
+
+jobs:
+  mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Rust para Mac Intel
+        run: rustup target add x86_64-apple-darwin
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - run: npm ci
+
+      - name: Compilar Atelier v2.app (x86_64)
+        run: npm run tauri build -- --target x86_64-apple-darwin --bundles app
+
+      - name: Comprobar que es para Intel
+        run: |
+          for BIN in src-tauri/target/x86_64-apple-darwin/release/bundle/"macos/Atelier v2.app/Contents/MacOS/"*; do
+            lipo -info "$BIN"
+            lipo -info "$BIN" | grep -q "architecture: x86_64"
+          done
+
+      # ditto conserva permisos y enlaces del .app (un zip normal los rompe)
+      - name: Comprimir
+        run: ditto -c -k --keepParent "src-tauri/target/x86_64-apple-darwin/release/bundle/macos/Atelier v2.app" Atelier-v2.zip
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Atelier-v2-mac
+          path: Atelier-v2.zip

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boceto C · Mesa de montaje</title>
+<style>
+  :root {
+    --fondo: #141414; --panel: #1c1c1c; --panel2: #242424; --borde: #333;
+    --texto: #e4e4e4; --suave: #8c8c8c; --acento: #3ec7a5;
+    --idea: #8a8d94; --borrador: #5b9bd5; --propuesta: #a07ad6; --canon: #4fb37a; --aparcado: #c9a14a; --descartado: #b25b5b;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fondo); color: var(--texto); font: 13px/1.4 system-ui, sans-serif; height: 100vh; display: grid; grid-template-rows: 38px 1fr 260px 24px; grid-template-columns: 260px 1fr 320px; }
+  header { grid-column: 1/-1; display: flex; align-items: center; gap: 14px; padding: 0 12px; background: var(--panel); border-bottom: 1px solid var(--borde); }
+  header b { color: var(--acento); }
+  header .pestanas { display: flex; gap: 2px; margin-left: 20px; }
+  header .pestanas span { padding: 4px 10px; border-radius: 4px; color: var(--suave); }
+  header .pestanas span.on { background: var(--panel2); color: var(--texto); }
+  header .der { margin-left: auto; color: var(--suave); }
+  .arbol { grid-row: 2/4; background: var(--panel); border-right: 1px solid var(--borde); overflow: auto; padding: 8px 0; }
+  .arbol h3 { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--suave); margin: 8px 12px; }
+  .nodo { padding: 4px 10px; display: flex; gap: 6px; align-items: center; cursor: pointer; white-space: nowrap; }
+  .nodo:hover { background: var(--panel2); }
+  .nodo.sel { background: #1e3a33; }
+  .nodo .p { width: 7px; height: 7px; border-radius: 2px; flex: none; }
+  .n1 { padding-left: 12px; } .n2 { padding-left: 26px; } .n3 { padding-left: 40px; } .n4 { padding-left: 54px; }
+  .tri { color: var(--suave); width: 10px; display: inline-block; }
+  .visor { background: var(--fondo); overflow: auto; padding: 16px 20px; }
+  .visor h2 { margin: 0; font-size: 22px; font-weight: 600; }
+  .visor .sub { color: var(--suave); margin: 2px 0 14px; }
+  .visor .texto { font: 15px/1.7 Georgia, serif; max-width: 70ch; color: #ddd; }
+  .visor .tabs { display: flex; gap: 16px; border-bottom: 1px solid var(--borde); margin: 18px 0 10px; }
+  .visor .tabs span { padding: 6px 0; color: var(--suave); }
+  .visor .tabs span.on { color: var(--texto); border-bottom: 2px solid var(--acento); }
+  .comparar { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .comparar div { background: var(--panel); border: 1px solid var(--borde); border-radius: 6px; padding: 10px; }
+  .comparar div.elegida { border-color: var(--canon); }
+  .comparar small { color: var(--suave); display: block; margin-bottom: 4px; }
+  .inspector { grid-row: 2/4; grid-column: 3; background: var(--panel); border-left: 1px solid var(--borde); overflow: auto; padding: 12px; }
+  .inspector h4 { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--suave); margin: 14px 0 6px; }
+  .inspector h4:first-child { margin-top: 0; }
+  .fila { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #262626; }
+  .fila span:first-child { color: var(--suave); }
+  .guia { background: #232014; border: 1px solid #4a4020; border-radius: 6px; padding: 8px; margin-bottom: 6px; }
+  .guia .r { color: #e5c06a; font-weight: 600; }
+  .guia .acc { margin-top: 6px; display: flex; gap: 6px; }
+  .guia button { font: 11px system-ui; background: var(--panel2); color: var(--texto); border: 1px solid var(--borde); border-radius: 4px; padding: 2px 7px; }
+  .linea { grid-column: 2; background: var(--panel); border-top: 1px solid var(--borde); overflow: auto; padding: 8px 12px; }
+  .regla { display: grid; grid-template-columns: 130px repeat(8, 1fr); font: 11px ui-monospace, monospace; color: var(--suave); margin-bottom: 4px; }
+  .regla span { border-left: 1px solid var(--borde); padding-left: 4px; }
+  .regla span.on { color: var(--acento); }
+  .pista { display: grid; grid-template-columns: 130px repeat(8, 1fr); align-items: center; height: 26px; }
+  .pista .nom { color: var(--suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; }
+  .clip { height: 18px; border-radius: 3px; font-size: 11px; padding: 0 6px; display: flex; align-items: center; color: #111; overflow: hidden; white-space: nowrap; }
+  .hueco { height: 18px; border: 1px dashed #5a4a1e; border-radius: 3px; background: repeating-linear-gradient(45deg, transparent 0 4px, #3a301522 4px 8px); }
+  .cabezal { position: relative; }
+  footer { grid-column: 1/-1; background: var(--panel); border-top: 1px solid var(--borde); display: flex; gap: 18px; align-items: center; padding: 0 12px; color: var(--suave); font-size: 11px; }
+  .nota { position: fixed; top: 46px; right: 330px; font-size: 12px; color: var(--suave); background: var(--panel2); padding: 6px 10px; border-radius: 6px; border: 1px dashed var(--borde); }
+</style>
+</head>
+<body>
+<header>
+  <b>Atelier</b><span>Primera · prueba</span>
+  <div class="pestanas"><span class="on">Estructura</span><span>Tablero</span><span>Emisión</span><span>Historia</span><span>Fichas</span></div>
+  <span class="der">Ctrl Espacio · nueva idea</span>
+</header>
+
+<nav class="arbol">
+  <h3>Serie</h3>
+  <div class="nodo n1"><span class="tri">▾</span><span class="p" style="background:var(--borrador)"></span>Primera · prueba</div>
+  <div class="nodo n2"><span class="tri">▸</span>Tramas (7)</div>
+  <div class="nodo n2"><span class="tri">▾</span><span class="p" style="background:var(--borrador)"></span>T1 · Cerrar la emisora</div>
+  <div class="nodo n3 sel"><span class="tri">▾</span><span class="p" style="background:var(--propuesta)"></span>E05 · El apagón</div>
+  <div class="nodo n4"><span class="tri"></span><span class="p" style="background:var(--borrador)"></span>Acto 1 · El cierre</div>
+  <div class="nodo n4"><span class="tri"></span><span class="p" style="background:var(--idea)"></span>Acto 2 · La herida</div>
+  <div class="nodo n3"><span class="tri">▸</span><span class="p" style="background:var(--idea)"></span>E06 · La cinta</div>
+  <div class="nodo n3"><span class="tri">▸</span><span class="p" style="background:var(--idea)"></span>E07 · Voz vieja</div>
+  <div class="nodo n2"><span class="tri">▸</span><span class="p" style="background:var(--idea)"></span>T2 · sin título</div>
+  <div class="nodo n2"><span class="tri">▸</span><span class="p" style="background:var(--idea)"></span>T3 · sin título</div>
+  <h3>Fichas</h3>
+  <div class="nodo n1"><span class="tri">▸</span>Personajes</div>
+  <div class="nodo n1"><span class="tri">▸</span>Lugares</div>
+  <div class="nodo n1"><span class="tri">▸</span>Secretos</div>
+  <h3>Descartados</h3>
+  <div class="nodo n1" style="color:var(--suave);text-decoration:line-through">Nando se va en E05</div>
+</nav>
+
+<section class="visor">
+  <h2>E05 · El apagón</h2>
+  <div class="sub">Temporada 1 · propuesta · 2 versiones en juego</div>
+  <div class="texto">Telmo mantiene la emisora en el aire, pero el Alcalde se lo cobra a su manera: alguien cercano paga por él.</div>
+  <div class="tabs"><span class="on">Versiones</span><span>Escenas</span><span>Notas libres</span></div>
+  <div class="comparar">
+    <div class="elegida"><small>Versión A · propuesta</small>Nando se queda sin voz en antena y culpa a Telmo. La amistad se rompe aquí.</div>
+    <div><small>Versión B · aparcada</small>Nando se va. Descartada antes como arco; vuelve como alternativa de episodio.</div>
+  </div>
+</section>
+
+<aside class="inspector">
+  <h4>Pieza</h4>
+  <div class="fila"><span>Estado</span><span style="color:var(--propuesta)">propuesta</span></div>
+  <div class="fila"><span>Carga</span><span>+ → −</span></div>
+  <div class="fila"><span>Nota</span><span>Episodios/E05 El apagón.md</span></div>
+  <h4>Guías · 2 avisos</h4>
+  <div class="guia"><span class="r">G42 · Toda escena cambia un valor.</span><br>«Acto 2 · La herida» empieza y acaba en −.<div class="acc"><button>Ver escena</button><button>Seguir así</button></div></div>
+  <div class="guia"><span class="r">G14 · Ningún arco desaparece demasiado.</span><br>«La cinta oculta» no aparece de E02 a E05.<div class="acc"><button>Ver arco</button><button>Seguir así</button></div></div>
+  <h4>Enlaces</h4>
+  <div class="fila"><span>Personajes</span><span>[[Telmo]] [[Nando]]</span></div>
+  <div class="fila"><span>Arcos</span><span>Amistad rota</span></div>
+</aside>
+
+<section class="linea">
+  <div class="regla"><span style="border:0"></span><span>E01</span><span>E02</span><span>E03</span><span>E04</span><span class="on">E05</span><span>E06</span><span>E07</span><span>E08</span></div>
+  <div class="pista"><span class="nom">El eco · A</span><div class="clip" style="grid-column:2/10;background:#d65b5b">El eco</div></div>
+  <div class="pista"><span class="nom">La tormenta · A</span><div class="clip" style="grid-column:4/9;background:#4fb3a9">La tormenta</div></div>
+  <div class="pista"><span class="nom">Telmo · personaje</span><div class="clip" style="grid-column:2/10;background:#c58be0">callar → avisar</div></div>
+  <div class="pista"><span class="nom">Amistad rota · B</span><div class="clip" style="grid-column:4/7;background:#8fb0e0">Amistad</div></div>
+  <div class="pista"><span class="nom">La cinta oculta · B</span><div class="clip" style="grid-column:2/3;background:#e0b04c">siembra</div><div class="hueco" style="grid-column:3/7"></div><div class="clip" style="grid-column:7/8;background:#e0b04c">carta</div></div>
+  <div class="pista"><span class="nom">Voces cruzadas · C</span><div class="clip" style="grid-column:3/9;background:#9bd17a">Amor</div></div>
+</section>
+
+<footer><span>● Guardado</span><span>Vault</span><span>Solo abierta en PC-ESTUDIO</span><span style="margin-left:auto">Carga T1: + − + − + − + −</span></footer>
+<div class="nota">Boceto C — Mesa de montaje: árbol a la izquierda, pieza en el centro, arcos abajo como pistas de vídeo.</div>
+<script>
+  document.querySelectorAll('.nodo').forEach(n => n.addEventListener('click', () => {
+    document.querySelectorAll('.nodo').forEach(x => x.classList.remove('sel')); n.classList.add('sel');
+  }));
+</script>
+</body>
+</html>

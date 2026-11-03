@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boceto F · ¿Y si…?</title>
+<style>
+  :root {
+    --fondo: #111214; --panel: #18191c; --panel2: #202226; --borde: #2c2e33;
+    --texto: #e8e8ea; --suave: #8e9198; --acento: #d0743c;
+    --mas: #d9b25f; --menos: #7f9bb8; --aviso: #e07a5f; --bien: #5fb38a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fondo); color: var(--texto); font: 14px/1.45 system-ui, sans-serif; height: 100vh; display: grid; grid-template-rows: auto 1fr; }
+  header { display: flex; align-items: center; gap: 14px; padding: 10px 18px; border-bottom: 1px solid var(--borde); }
+  header h1 { margin: 0; font: italic 22px Georgia, serif; }
+  .modo { display: flex; background: var(--panel); border: 1px solid var(--borde); border-radius: 8px; padding: 3px; margin-left: 18px; }
+  .modo button { background: none; border: 0; color: var(--suave); padding: 5px 12px; border-radius: 6px; font: inherit; cursor: pointer; }
+  .modo button.on { background: var(--panel2); color: var(--texto); }
+  header .der { margin-left: auto; display: flex; gap: 8px; }
+  header button.b { background: var(--panel2); color: var(--texto); border: 1px solid var(--borde); border-radius: 6px; padding: 6px 10px; font: inherit; cursor: pointer; }
+  .cuerpo { display: grid; grid-template-columns: 300px 1fr 320px; min-height: 0; }
+
+  .pruebas { border-right: 1px solid var(--borde); background: var(--panel); padding: 16px; overflow: auto; }
+  .pruebas h3, .balance h3 { margin: 0 0 10px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--suave); }
+  .prueba { border: 1px solid var(--borde); border-radius: 8px; padding: 10px; margin-bottom: 8px; cursor: pointer; display: flex; gap: 10px; background: var(--panel2); }
+  .prueba.on { border-color: var(--acento); background: #2a1e16; }
+  .prueba input { accent-color: var(--acento); margin-top: 3px; }
+  .prueba small { display: block; color: var(--suave); }
+  .nueva { width: 100%; background: none; border: 1px dashed var(--borde); color: var(--suave); border-radius: 8px; padding: 10px; font: inherit; cursor: pointer; }
+
+  .piramide { overflow: auto; padding: 18px 24px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .serie { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; padding: 12px 18px; max-width: 640px; text-align: center; }
+  .serie h2 { margin: 0; font: 24px Georgia, serif; }
+  .serie p { margin: 4px 0 0; color: var(--suave); font: italic 14px Georgia, serif; }
+  .temps { display: flex; gap: 12px; width: 100%; }
+  .temp { flex: 8; background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; padding: 10px; }
+  .temp.prev { flex: 2; border-style: dashed; opacity: .55; }
+  .temp h4 { margin: 0 0 8px; font: italic 15px Georgia, serif; display: flex; justify-content: space-between; }
+  .temp h4 small { font: 11px ui-monospace, monospace; color: var(--suave); }
+  .eps { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+  .ep { background: var(--panel2); border-radius: 6px; padding: 6px 4px; min-height: 120px; display: flex; flex-direction: column; gap: 3px; border: 1px solid transparent; }
+  .ep .n { font: 10px ui-monospace, monospace; color: var(--suave); text-align: center; }
+  .ep .tit { font-size: 11px; text-align: center; min-height: 28px; }
+  .chip { height: 6px; border-radius: 3px; }
+  .chip.fuera { opacity: .25; outline: 1px dashed currentColor; background: transparent !important; height: 5px; }
+  .chip.nuevo { box-shadow: 0 0 0 1px var(--acento); }
+  .ep.cambia { border-color: var(--acento); }
+  .ep .ojo { font-size: 10px; text-align: center; color: var(--mas); }
+  .leyenda { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: var(--suave); }
+  .leyenda span::before { content: ''; display: inline-block; width: 14px; height: 6px; border-radius: 3px; margin-right: 5px; background: var(--c); vertical-align: middle; }
+
+  .balance { border-left: 1px solid var(--borde); background: var(--panel); padding: 16px; overflow: auto; }
+  .cifras { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .cifra { background: var(--panel2); border-radius: 8px; padding: 10px; }
+  .cifra b { font-size: 22px; display: block; }
+  .cifra small { color: var(--suave); }
+  .cifra.peor b { color: var(--aviso); } .cifra.mejor b { color: var(--bien); }
+  .linea { font-size: 13px; padding: 7px 0; border-bottom: 1px solid var(--borde); }
+  .linea.mal { color: #f0a08c; } .linea.bien { color: #9fd8bb; }
+  .linea b { font-weight: 600; }
+  .fin { display: flex; gap: 6px; margin-top: 14px; }
+  .fin button { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--borde); background: var(--panel2); color: var(--texto); font: inherit; cursor: pointer; }
+  .fin button.prim { background: var(--acento); border-color: var(--acento); color: #1c0f06; font-weight: 600; }
+  .nota { position: fixed; bottom: 12px; left: 18px; font-size: 12px; color: var(--suave); background: var(--panel2); padding: 6px 10px; border-radius: 6px; border: 1px dashed var(--borde); max-width: 520px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Primera · prueba</h1>
+  <div class="modo" id="modo"><button data-m="antes">Ahora</button><button data-m="despues" class="on">Cómo quedaría</button></div>
+  <div class="der"><button class="b">Mapa de arcos</button><button class="b">Tablero</button><button class="b">Fichas</button></div>
+</header>
+
+<div class="cuerpo">
+  <aside class="pruebas">
+    <h3>¿Y si…? · pruebas activas</h3>
+    <label class="prueba on"><input type="checkbox" data-p="nando" checked><div>Nando se va en E05<small>Versión B de «El apagón»</small></div></label>
+    <label class="prueba"><input type="checkbox" data-p="tormenta"><div>La tormenta pasa a T2<small>Mueve el arco entero</small></div></label>
+    <label class="prueba"><input type="checkbox" data-p="cinta"><div>La señal se revela en T1 E08<small>Adelanta el secreto central</small></div></label>
+    <button class="nueva">+ Probar otra cosa</button>
+    <p style="color:var(--suave);font-size:12px;margin-top:14px">Cada prueba se guarda en la vault como <b>propuesta</b>. Nada toca el canon hasta que pulses «Aplicar».</p>
+  </aside>
+
+  <section class="piramide">
+    <div class="serie"><h2>Primera · prueba</h2><p>Un técnico de radio vuelve a su pueblo para cerrar la emisora de su madre y descubre que cada noche capta una voz que lee las noticias del día siguiente.</p></div>
+    <div class="temps" id="temps"></div>
+    <div class="leyenda">
+      <span style="--c:#d0655b">El eco</span><span style="--c:#4fb3a9">La tormenta</span><span style="--c:#b48ad8">Telmo</span><span style="--c:#7fa6de">Amistad rota</span><span style="--c:#d9b25f">La cinta oculta</span><span style="--c:#8fc47a">Voces cruzadas</span>
+    </div>
+  </section>
+
+  <aside class="balance">
+    <h3>Balance del cambio</h3>
+    <div class="cifras" id="cifras"></div>
+    <div id="lineas"></div>
+    <div class="fin"><button>Descartar</button><button>Aparcar</button><button class="prim">Aplicar</button></div>
+  </aside>
+</div>
+
+<div class="nota">Boceto F — La serie entera como pirámide (serie → temporadas → episodios). Activa pruebas a la izquierda y alterna «Ahora / Cómo quedaría»: ves qué cambia y si mejora o empeora según tus guías.</div>
+
+<script>
+  const tit = ['La señal','El aviso','Dos micrófonos','Primera guardia','El apagón','La cinta','Voz vieja','El pleno','','','','','','','',''];
+  const A = { ven: '#d0655b', tor: '#4fb3a9', tel: '#b48ad8', her: '#7fa6de', car: '#d9b25f', amo: '#8fc47a' };
+  const base = { ven: [0,15], tel: [0,15], tor: [3,6], her: [2,5], car: [0,0,5,9], amo: [1,7] };
+  let modo = 'despues';
+  const activas = () => [...document.querySelectorAll('[data-p]')].filter(c => c.checked).map(c => c.dataset.p);
+  function rangos(p) {
+    const r = JSON.parse(JSON.stringify(base));
+    if (p.includes('nando')) { r.her = [2, 4]; r.amo = [1, 4]; }
+    if (p.includes('tormenta')) r.tor = [10, 13];
+    return r;
+  }
+  const dentro = (rg, i) => rg.length === 4 ? (i === rg[0] || (i >= rg[2] && i <= rg[3])) : (i >= rg[0] && i <= rg[1]);
+  function pintar() {
+    const p = modo === 'despues' ? activas() : [];
+    const r = rangos(p), r0 = rangos([]);
+    const ep = i => {
+      let ch = '', cambia = false;
+      for (const k in A) {
+        const ahora = dentro(r0[k], i), luego = dentro(r[k], i);
+        if (luego) ch += `<div class="chip ${!ahora ? 'nuevo' : ''}" style="background:${A[k]}"></div>`;
+        else if (ahora && modo === 'despues' && p.length) { ch += `<div class="chip fuera" style="color:${A[k]}"></div>`; }
+        if (ahora !== luego) cambia = true;
+      }
+      const ojo = (p.includes('cinta') && i === 7) ? '<div class="ojo">👁 se revela la cinta</div>' : '';
+      if (ojo) cambia = true;
+      const t = (p.includes('nando') && i === 4) ? 'El apagón · B' : tit[i];
+      return `<div class="ep ${cambia && p.length ? 'cambia' : ''}"><div class="n">E0${i % 8 + 1}</div><div class="tit">${t || '—'}</div>${ch}${ojo}</div>`;
+    };
+    const eps = (a, b) => Array.from({ length: b - a }, (_, k) => ep(a + k)).join('');
+    document.getElementById('temps').innerHTML =
+      `<div class="temp"><h4>T1 · Cerrar la emisora <small>+ → −</small></h4><div class="eps">${eps(0, 8)}</div></div>` +
+      `<div class="temp"><h4>T2 <small>− → +</small></h4><div class="eps">${eps(8, 16)}</div></div>` +
+      `<div class="temp prev"><h4>T3 <small>prevista</small></h4></div>`;
+    balance(activas());
+  }
+  function balance(p) {
+    const L = [];
+    let antes = 3, despues = 3;
+    if (p.includes('nando')) {
+      L.push(['mal', '<b>G24 · Chuleta</b> — «Amistad rota» se cierra sin que Telmo aprenda la lección: la relación termina por muerte, no por cambio.']);
+      L.push(['bien', '<b>G30</b> — T1 gana un punto de crisis claro en E05.']);
+      L.push(['', 'Afecta a [[Nando]] (muere en T1 E05) y a «Voces cruzadas», que pierde su segundo personaje.']);
+      despues += 1;
+    }
+    if (p.includes('tormenta')) {
+      L.push(['mal', '<b>G13</b> — «La tormenta» es tramo de T1 y pasaría a T2: hay que cambiar su nivel.']);
+      L.push(['', 'T1 se queda sin trama A propia entre E03 y E07: solo El eco.']);
+      despues += 1;
+    }
+    if (p.includes('cinta')) {
+      L.push(['mal', '<b>G32 · Chuleta</b> — No resuelvas el conflicto general salvo en la última temporada. Revelar la cinta en T1 lo resuelve demasiado pronto.']);
+      L.push(['bien', '<b>G33</b> — T1 acaba con una incógnita nueva (¿quién grabó la cinta?).']);
+      despues += 1;
+    }
+    if (!p.length) L.push(['', 'Activa una prueba a la izquierda para ver su balance.']);
+    document.getElementById('cifras').innerHTML =
+      `<div class="cifra"><b>${antes}</b><small>avisos ahora</small></div><div class="cifra ${despues > antes ? 'peor' : despues < antes ? 'mejor' : ''}"><b>${despues}</b><small>avisos si lo aplicas</small></div>`;
+    document.getElementById('lineas').innerHTML = L.map(([c, t]) => `<div class="linea ${c}">${t}</div>`).join('');
+  }
+  document.querySelectorAll('[data-p]').forEach(c => c.addEventListener('change', () => { c.closest('.prueba').classList.toggle('on', c.checked); pintar(); }));
+  document.querySelectorAll('#modo button').forEach(b => b.addEventListener('click', () => {
+    modo = b.dataset.m; document.querySelectorAll('#modo button').forEach(x => x.classList.toggle('on', x === b)); pintar();
+  }));
+  pintar();
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+node_modules
+dist
+src-tauri/target
+src-tauri/gen/schemas
+.DS_Store
+.env
+.env.*
+!.env.example
+vite.config.ts.timestamp-*
+
+# Sistema, editores y logs
+Thumbs.db
+*.log
+.vscode/*
+!.vscode/extensions.json
+
+# Documentos de instrucciones para agentes de IA: solo en local, nunca en el repositorio
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.claude/
+.agent/
+.agents/
+.cursor/
+.cursorrules
+.windsurfrules
+.github/copilot-instructions.md
+
+# Herramienta de exportacion: la lista de palabras bloqueadas es solo local
+.export-*

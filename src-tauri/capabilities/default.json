@@ -1,0 +1,68 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Permisos de la ventana principal. Leer y escribir, solo dentro de la carpeta del usuario; borrar, solo dentro de appDatos (spec 001, RF-6 a RF-8). Sin alcance global: los alcances de cada orden se suman al global.",
+  "windows": [
+    "main"
+  ],
+  "permissions": [
+    "core:default",
+    "os:allow-platform",
+    "os:allow-hostname",
+    "dialog:allow-open",
+    "core:window:allow-destroy",
+    {
+      "identifier": "fs:allow-read-text-file",
+      "allow": [{ "path": "$HOME" }, { "path": "$HOME/**" }]
+    },
+    {
+      "identifier": "fs:allow-write-text-file",
+      "allow": [{ "path": "$HOME/**" }]
+    },
+    {
+      "identifier": "fs:allow-read-file",
+      "allow": [{ "path": "$HOME/**" }]
+    },
+    {
+      "identifier": "fs:allow-write-file",
+      "allow": [{ "path": "$HOME/**" }]
+    },
+    {
+      "identifier": "fs:allow-rename",
+      "allow": [{ "path": "$HOME/**" }]
+    },
+    {
+      "identifier": "fs:allow-remove",
+      "allow": [{ "path": "$HOME/**/appDatos/**" }]
+    },
+    {
+      "identifier": "fs:allow-exists",
+      "allow": [{ "path": "$HOME" }, { "path": "$HOME/**" }]
+    },
+    {
+      "identifier": "fs:allow-read-dir",
+      "allow": [{ "path": "$HOME" }, { "path": "$HOME/**" }]
+    },
+    {
+      "identifier": "fs:allow-mkdir",
+      "allow": [{ "path": "$HOME/**" }]
+    },
+    {
+      "identifier": "fs:allow-stat",
+      "allow": [{ "path": "$HOME" }, { "path": "$HOME/**" }]
+    },
+    {
+      "identifier": "fs:allow-watch",
+      "allow": [{ "path": "$HOME/**" }]
+    },
+    "fs:allow-unwatch",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [
+        {
+          "url": "obsidian://*"
+        }
+      ]
+    }
+  ]
+}

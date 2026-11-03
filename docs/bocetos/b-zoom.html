@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boceto B · Zoom por niveles</title>
+<style>
+  :root {
+    --fondo: #0f1011; --panel: #17181a; --tarjeta: #1d1f22; --borde: #2c2e33;
+    --texto: #ececee; --suave: #8f9299; --acento: #4c8dff;
+    --idea: #8a8d94; --borrador: #5b9bd5; --propuesta: #a07ad6; --canon: #4fb37a; --aparcado: #c9a14a; --descartado: #b25b5b;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fondo); color: var(--texto); font: 14px/1.45 system-ui, sans-serif; height: 100vh; display: flex; flex-direction: column; }
+  header { display: flex; align-items: center; gap: 12px; padding: 12px 20px; }
+  .migas { display: flex; align-items: center; gap: 6px; font-size: 15px; }
+  .migas a { color: var(--suave); text-decoration: none; padding: 4px 8px; border-radius: 6px; }
+  .migas a:hover { background: var(--panel); color: var(--texto); }
+  .migas a.aqui { color: var(--texto); font-weight: 600; }
+  .migas span { color: var(--borde); }
+  .niveles { margin-left: auto; display: flex; background: var(--panel); border-radius: 8px; padding: 3px; }
+  .niveles button { background: none; border: 0; color: var(--suave); padding: 6px 12px; border-radius: 6px; font: inherit; cursor: pointer; }
+  .niveles button.on { background: var(--tarjeta); color: var(--texto); box-shadow: inset 0 0 0 1px var(--borde); }
+  .buscar { background: var(--panel); border: 1px solid var(--borde); color: var(--suave); border-radius: 8px; padding: 7px 12px; min-width: 260px; }
+  .lienzo { flex: 1; display: grid; grid-template-columns: 1fr 360px; min-height: 0; }
+  .zona { overflow: auto; padding: 8px 20px 20px; }
+  .cinta { display: grid; grid-template-columns: 120px repeat(8, 1fr); gap: 4px; align-items: center; margin-bottom: 4px; font-size: 12px; color: var(--suave); }
+  .cinta .barra { height: 8px; border-radius: 4px; }
+  .rejilla { display: grid; grid-template-columns: 120px repeat(8, 1fr); gap: 10px; margin-top: 16px; }
+  .rejilla .vacio { }
+  .tarjeta { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 10px; padding: 10px; min-height: 150px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; transition: transform .1s; }
+  .tarjeta:hover { transform: translateY(-2px); border-color: #444; }
+  .tarjeta.sel { border-color: var(--acento); box-shadow: 0 0 0 1px var(--acento); }
+  .tarjeta .num { font: 11px ui-monospace, monospace; color: var(--suave); display: flex; justify-content: space-between; }
+  .tarjeta h3 { margin: 0; font-size: 14px; }
+  .tarjeta p { margin: 0; color: var(--suave); font-size: 12px; flex: 1; }
+  .tarjeta .pie { display: flex; gap: 4px; align-items: center; }
+  .chip { font-size: 10px; padding: 2px 6px; border-radius: 99px; color: #fff; }
+  .hilos { display: flex; gap: 2px; margin-left: auto; }
+  .hilos i { width: 6px; height: 6px; border-radius: 50%; display: block; }
+  .tarjeta.nueva { border-style: dashed; align-items: center; justify-content: center; color: var(--suave); }
+  .avisos { color: #f0b44c; font-size: 11px; }
+  .pista { margin-top: 18px; color: var(--suave); font-size: 12px; }
+  aside { background: var(--panel); border-left: 1px solid var(--borde); overflow: auto; padding: 18px; }
+  aside h2 { margin: 0 0 4px; font-size: 22px; }
+  aside .sub { color: var(--suave); font-size: 12px; margin-bottom: 14px; }
+  .escribir { background: transparent; border: 0; color: var(--texto); font: 15px/1.6 Georgia, serif; width: 100%; min-height: 140px; resize: none; outline: none; }
+  .estado { display: flex; align-items: center; gap: 8px; margin: 10px 0 18px; }
+  .estado select { background: var(--tarjeta); color: var(--texto); border: 1px solid var(--borde); border-radius: 6px; padding: 5px 8px; font: inherit; }
+  .boton { background: var(--acento); color: #fff; border: 0; border-radius: 6px; padding: 6px 12px; cursor: pointer; font: inherit; }
+  .seccion { border-top: 1px solid var(--borde); padding-top: 12px; margin-top: 12px; }
+  .seccion h4 { margin: 0 0 8px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--suave); }
+  .guia { font-size: 13px; padding: 8px 10px; border-radius: 6px; background: #2a2414; color: #f2d79b; margin-bottom: 6px; }
+  .guia small { display: block; color: #c9b27a; margin-top: 2px; }
+  .flotante { position: fixed; right: 384px; bottom: 20px; background: var(--acento); color: #fff; border: 0; border-radius: 99px; padding: 12px 18px; font: 600 14px system-ui; box-shadow: 0 6px 20px #0008; cursor: pointer; }
+  .nota { position: fixed; bottom: 20px; left: 20px; font-size: 12px; color: var(--suave); background: var(--panel); padding: 6px 10px; border-radius: 6px; border: 1px dashed var(--borde); }
+</style>
+</head>
+<body>
+<header>
+  <div class="migas"><a href="#">Primera · prueba</a><span>›</span><a href="#">Temporada 1</a><span>›</span><a class="aqui" href="#">Episodios</a></div>
+  <div class="niveles"><button>Serie</button><button>Tramas</button><button>Temporadas</button><button class="on">Episodios</button><button>Escenas</button></div>
+  <input class="buscar" placeholder="Buscar o saltar a…  (Ctrl K)">
+</header>
+
+<div class="lienzo">
+  <div class="zona">
+    <div class="cinta"><span>El eco · A</span><div class="barra" style="grid-column:2/10;background:#d65b5b"></div></div>
+    <div class="cinta"><span>La tormenta · A</span><div class="barra" style="grid-column:4/9;background:#4fb3a9"></div></div>
+    <div class="cinta"><span>Telmo · personaje</span><div class="barra" style="grid-column:2/10;background:#c58be0"></div></div>
+    <div class="cinta"><span>La cinta · B</span><div class="barra" style="grid-column:2/3;background:#e0b04c"></div><div class="barra" style="grid-column:8/9;background:#e0b04c"></div></div>
+
+    <div class="rejilla">
+      <div class="vacio"></div>
+      <div class="tarjeta sel"><div class="num"><span>E01</span><span>+ −</span></div><h3>La señal</h3><p>Telmo vuelve a Cabo Sal para cerrar la emisora y capta una voz que lee las noticias de mañana.</p><div class="pie"><span class="chip" style="background:var(--canon)">canon</span><div class="hilos"><i style="background:#d65b5b"></i><i style="background:#c58be0"></i><i style="background:#e0b04c"></i></div></div></div>
+      <div class="tarjeta"><div class="num"><span>E02</span><span>− +</span></div><h3>El aviso</h3><p>Telmo acepta las condiciones del Alcalde.</p><div class="pie"><span class="chip" style="background:var(--borrador)">borrador</span><div class="hilos"><i style="background:#d65b5b"></i><i style="background:#c58be0"></i></div></div></div>
+      <div class="tarjeta"><div class="num"><span>E03</span><span>+ −</span></div><h3>Dos micrófonos</h3><p>Nando descubre lo que ha firmado Telmo.</p><div class="pie"><span class="chip" style="background:var(--borrador)">borrador</span><div class="hilos"><i style="background:#d65b5b"></i><i style="background:#4fb3a9"></i></div></div></div>
+      <div class="tarjeta"><div class="num"><span>E04</span><span>− +</span></div><h3>Primera guardia</h3><p>Empieza la tormenta.</p><div class="pie"><span class="chip" style="background:var(--borrador)">borrador</span><div class="hilos"><i style="background:#4fb3a9"></i></div></div></div>
+      <div class="tarjeta"><div class="num"><span>E05</span><span>+ −</span></div><h3>El apagón</h3><p>Dos versiones en juego.</p><div class="pie"><span class="chip" style="background:var(--propuesta)">propuesta ×2</span></div></div>
+      <div class="tarjeta"><div class="num"><span>E06</span><span>− +</span></div><h3>La cinta</h3><p></p><div class="pie"><span class="chip" style="background:var(--idea)">idea</span></div></div>
+      <div class="tarjeta"><div class="num"><span>E07</span><span class="avisos">▲ 1</span></div><h3>Voz vieja</h3><p></p><div class="pie"><span class="chip" style="background:var(--idea)">idea</span></div></div>
+      <div class="tarjeta nueva">+ Episodio</div>
+    </div>
+    <p class="pista">Doble clic en una tarjeta para entrar a sus escenas. Arrastra para reordenar. Las cintas de arriba son los arcos que cruzan esta temporada.</p>
+  </div>
+
+  <aside>
+    <h2>La señal</h2>
+    <div class="sub">T1 · E01 · editado hace 2 s · guardado en la vault</div>
+    <div class="estado"><select><option>canon</option><option>idea</option><option>borrador</option><option>propuesta</option><option>aparcado</option><option>descartado</option></select><button class="boton">Desbloquear para editar</button></div>
+    <textarea class="escribir" readonly>Telmo vuelve a Cabo Sal para cerrar la emisora y capta una voz que lee las noticias de mañana.
+
+Escribe aquí lo que quieras: no hay campos obligatorios.</textarea>
+    <div class="seccion">
+      <h4>Lo que dicen tus guías</h4>
+      <div class="guia">No acaba con ninguna incógnita abierta.<small>G40 · Guía de Atelier · «Que cada episodio acabe con alguna incógnita abierta»</small></div>
+    </div>
+    <div class="seccion">
+      <h4>Arcos que pasan por aquí</h4>
+      <div style="font-size:13px;color:var(--suave)">El eco (beat: la llegada) · Telmo (callar) · La cinta oculta (siembra)</div>
+    </div>
+  </aside>
+</div>
+
+<button class="flotante">+ Nueva idea</button>
+<div class="nota">Boceto B — Zoom por niveles: un nivel cada vez, como un corcho; entras con doble clic y sales por las migas.</div>
+<script>
+  document.querySelectorAll('.tarjeta:not(.nueva)').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('.tarjeta').forEach(x => x.classList.remove('sel')); t.classList.add('sel');
+  }));
+</script>
+</body>
+</html>
